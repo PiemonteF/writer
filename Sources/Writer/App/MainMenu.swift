@@ -86,6 +86,9 @@ enum MainMenu {
             item("Smaller", #selector(AppDelegate.smallerFont(_:)), "-"),
             .separator(),
             item("Word Count", #selector(AppDelegate.toggleStats(_:)), "c", [.command, .shift]),
+            submenu("Syntax Highlight", PartOfSpeech.allCases.map {
+                item($0.title, #selector(AppDelegate.togglePartOfSpeech(_:)), represents: $0)
+            } + [.separator(), item("Clear", #selector(AppDelegate.clearPartsOfSpeech(_:)))]),
             .separator(),
             item("Enter Full Screen", #selector(NSWindow.toggleFullScreen(_:)), "f", [.command, .control]),
         ]))

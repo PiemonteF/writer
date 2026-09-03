@@ -75,6 +75,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Preferences.shared.font = font
     }
 
+    @IBAction func togglePartOfSpeech(_ sender: NSMenuItem) {
+        guard let part = sender.representedObject as? PartOfSpeech else { return }
+        let prefs = Preferences.shared
+        prefs.highlightedParts = prefs.highlightedParts.symmetricDifference([part])
+    }
+
+    @IBAction func clearPartsOfSpeech(_ sender: Any?) {
+        Preferences.shared.highlightedParts = []
+    }
+
     @IBAction func biggerFont(_ sender: Any?) {
         let prefs = Preferences.shared
         prefs.fontSize = min(prefs.fontSize + 1, 40)
@@ -96,6 +106,7 @@ extension AppDelegate: NSMenuItemValidation {
         case #selector(toggleNightMode): item.state = prefs.appearance == .dark ? .on : .off
         case #selector(setAppearance): item.state = item.representedObject as? Appearance == prefs.appearance ? .on : .off
         case #selector(toggleStats): item.state = prefs.showStats ? .on : .off
+        case #selector(togglePartOfSpeech): item.state = (item.representedObject as? PartOfSpeech).map(prefs.highlightedParts.contains) == true ? .on : .off
         case #selector(setEditorFont): item.state = item.representedObject as? EditorFont == prefs.font ? .on : .off
         default: break
         }

@@ -4,7 +4,7 @@ A personal macOS clone of iA Writer. Native Swift, AppKit for the editor, no Xco
 
 ## Constraints
 
-- Build with Command Line Tools only (`swift build`). `swift-tools-version: 5.9`, `swiftLanguageVersions: [.v5]` so AppKit code is not fighting strict concurrency. macOS 14 deployment target.
+- Built with SwiftPM using Xcode's toolchain (`DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`, exported by the Makefile and `scripts/toolchain.sh`). The Command Line Tools SwiftPM on this machine cannot link package manifests. `swift-tools-version: 5.9` keeps Swift 5 language mode. macOS 14 deployment target. One dependency: Ink, for Markdown to HTML.
 - No storyboards, no nibs. Windows and menus are built in code.
 - Fonts ship in `Resources/Fonts` (iA Writer Duo S, Quattro S, Mono S, SIL OFL) and are registered at launch with `CTFontManagerRegisterFontsForURL(.process)`.
 - Resources are copied by the build script into `Contents/Resources`, read via `Bundle.main`. Do not use SwiftPM `resources:`.
@@ -25,9 +25,14 @@ Sources/Writer/
   Editor/Theme.swift               colors and fonts derived from Preferences + appearance
   Editor/StatsBar.swift            bottom bar: word count and reading time
   Markdown/MarkdownHighlighter.swift  text -> [Span], applied to NSTextStorage
+  Markdown/MarkdownRenderer.swift  Markdown -> HTML body or full document (Ink)
+  Preview/PreviewViewController.swift  WKWebView preview, PDF via createPDF
+  Library/LibraryNode.swift        folder tree of md/txt files, search
+  Library/LibraryViewController.swift  sidebar outline, folder watcher, opens documents
   Text/TextStatistics.swift        words, characters, sentences, reading time (pure)
   Text/FocusRange.swift            sentence/paragraph range around the caret (pure)
-Tests/WriterTests/                 pure-function tests: highlighter, statistics, focus range
+  Text/PartsOfSpeech.swift         NLTagger lexical classes -> [PartOfSpeechSpan] (pure)
+Tests/WriterTests/                 pure-function tests: highlighter, renderer, statistics, focus range, parts of speech
 Resources/Info.plist
 Resources/Fonts/*.ttf
 scripts/build-app.sh               swift build -c release, assemble .app, ad hoc codesign
@@ -52,6 +57,9 @@ final class Preferences {                      // UserDefaults-backed, posts .pr
     var typewriter: Bool            // default false
     var showStats: Bool             // default true
     var lineLength: Int             // max characters per line, default 66
+    var highlightedParts: Set<PartOfSpeech>  // default empty
+    var libraryURL: URL             // default ~/Documents/Writer
+    var showLibrary: Bool           // default false
 }
 
 struct Theme {                                  // value, rebuilt on preference or appearance change
@@ -82,7 +90,7 @@ Rules are `(NSRegularExpression, styleForWholeMatch, styleForMarkupGroups)` in o
 
 Applying: on `NSTextStorageDelegate.textStorage(_:didProcessEditing:)`, recompute spans for the whole document when it is under 200 KB (measured in UTF-16 units), otherwise for the edited paragraph range only. Reset the affected range to base attributes (theme font, text color, paragraph style with line height), then layer spans. Attribute application is wrapped in `beginEditing`/`endEditing`.
 
-Focus mode uses temporary attributes on the layout manager, never the text storage, so it never dirties the document.
+Focus mode and parts-of-speech colors are one overlay of temporary foreground-color attributes on the layout manager, never the text storage, so they never dirty the document. `applyOverlay()` clears the overlay, paints part-of-speech colors (skipping code and URL spans), then paints `dimmedText` outside the focus range so dimming wins.
 
 ```swift
 enum FocusRange {
@@ -129,6 +137,10 @@ Window: 760 by 900 default, title bar shows document name, `titlebarAppearsTrans
 
 `make test` runs the pure-function tests. `make run` builds `build/Writer.app` and opens it. A screenshot of the running window is the acceptance artifact for anything visual: `scripts/screenshot.sh` finds the Writer window via `CGWindowListCopyWindowInfo` (a short Swift script) and calls `screencapture -l <id>`.
 
+## Window
+
+`EditorWindowController` owns an `NSSplitViewController` with three items: the library sidebar (collapsible, state in Preferences), the editor, and the preview (collapsed by default, per window). Preview (⌘R) widens the window to at least 1240 points and renders with `preview.css` from the bundle, so the bundled fonts load through relative `@font-face` URLs. Export PDF renders into an offscreen preview sized to A4 and calls `WKWebView.createPDF`.
+
 ## Later phases
 
-Preview pane and export (WebKit, Markdown to HTML), library sidebar over a folder, parts-of-speech syntax highlight (NaturalLanguage), style check, app icon.
+Style check (fill words, clichés, redundancies), content blocks, a preferences window, an app icon.

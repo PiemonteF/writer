@@ -69,6 +69,11 @@ final class Preferences {
         set { store(newValue, "showStats") }
     }
 
+    var highlightedParts: Set<PartOfSpeech> {
+        get { Set((defaults.stringArray(forKey: "highlightedParts") ?? []).compactMap(PartOfSpeech.init(rawValue:))) }
+        set { store(newValue.map(\.rawValue).sorted(), "highlightedParts") }
+    }
+
     var libraryURL: URL {
         get {
             defaults.string(forKey: "libraryPath").map { URL(fileURLWithPath: $0) }

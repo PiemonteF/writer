@@ -29,7 +29,7 @@ final class LibraryNode {
     }
 
     private static func load(_ directory: URL) -> [LibraryNode] {
-        let keys: [URLResourceKey] = [.isDirectoryKey, .isHiddenKey]
+        let keys: [URLResourceKey] = [.isDirectoryKey]
         let urls = (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: keys, options: [.skipsHiddenFiles])) ?? []
         let nodes = urls.compactMap { url -> LibraryNode? in
             let isDirectory = (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory ?? false

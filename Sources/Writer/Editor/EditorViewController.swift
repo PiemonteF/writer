@@ -9,6 +9,9 @@ final class EditorViewController: NSViewController {
     private var theme: Theme
     private var spans: [Span] = []
     private var statsWork: DispatchWorkItem?
+    private var partsWork: DispatchWorkItem?
+    private var partSpans: [PartOfSpeechSpan] = []
+    private var partSpansText = ""
     private var prefs: Preferences { .shared }
     var onTextChange: (() -> Void)?
 
@@ -91,7 +94,8 @@ final class EditorViewController: NSViewController {
         textView.string = text
         textView.setSelectedRange(NSRange(location: 0, length: 0))
         rehighlightAll()
-        applyFocus()
+        scheduleParts()
+        applyOverlay()
         scheduleStats()
     }
 
@@ -114,7 +118,8 @@ final class EditorViewController: NSViewController {
         statsBar.layer?.backgroundColor = theme.background.cgColor
         updateContentInsets()
         rehighlightAll()
-        applyFocus()
+        scheduleParts()
+        applyOverlay()
         scheduleStats()
         view.needsLayout = true
         if prefs.typewriter { centerCaret() }
@@ -152,9 +157,16 @@ final class EditorViewController: NSViewController {
         }
     }
 
-    private func applyFocus() {
+    private func applyOverlay() {
         let full = NSRange(location: 0, length: storage.length)
         layoutManager.removeTemporaryAttribute(.foregroundColor, forCharacterRange: full)
+        if partSpansText == storage.string {
+            let literal = spans.filter { [.code, .codeBlock, .url, .markup].contains($0.style) }.map(\.range)
+            for span in partSpans where NSMaxRange(span.range) <= full.length
+                && !literal.contains(where: { NSIntersectionRange($0, span.range).length > 0 }) {
+                layoutManager.addTemporaryAttribute(.foregroundColor, value: theme.partColors[span.part]!, forCharacterRange: span.range)
+            }
+        }
         guard let focus = FocusRange.range(mode: prefs.focusMode, caret: textView.selectedRange().location, in: storage.string as NSString)
         else { return }
         let before = NSRange(location: 0, length: focus.location)
@@ -165,7 +177,6 @@ final class EditorViewController: NSViewController {
     }
 
     private func centerCaret() {
-        guard let container = textView.textContainer else { return }
         let caret = textView.selectedRange().location
         let glyphCount = layoutManager.numberOfGlyphs
         var line: NSRect
@@ -178,12 +189,33 @@ final class EditorViewController: NSViewController {
         } else {
             line = layoutManager.lineFragmentRect(forGlyphAt: glyphCount - 1, effectiveRange: nil)
         }
-        _ = container
         let clip = scrollView.contentView
         let midY = line.midY + textView.textContainerInset.height
         let target = max(0, min(midY - clip.bounds.height / 2, textView.frame.height - clip.bounds.height))
         clip.scroll(to: NSPoint(x: 0, y: target))
         scrollView.reflectScrolledClipView(clip)
+    }
+
+    private func scheduleParts() {
+        partsWork?.cancel()
+        let parts = prefs.highlightedParts
+        let text = storage.string
+        guard !parts.isEmpty else {
+            partSpans = []
+            partSpansText = ""
+            return
+        }
+        let work = DispatchWorkItem { [weak self] in
+            let spans = PartsOfSpeech.spans(in: text, parts: parts)
+            DispatchQueue.main.async {
+                guard let self, self.storage.string == text else { return }
+                self.partSpans = spans
+                self.partSpansText = text
+                self.applyOverlay()
+            }
+        }
+        partsWork = work
+        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 0.3, execute: work)
     }
 
     private func scheduleStats() {
@@ -228,14 +260,15 @@ extension EditorViewController: NSTextViewDelegate {
     }
 
     func textDidChange(_ notification: Notification) {
-        applyFocus()
+        applyOverlay()
+        scheduleParts()
         scheduleStats()
         onTextChange?()
         if prefs.typewriter { centerCaret() }
     }
 
     func textViewDidChangeSelection(_ notification: Notification) {
-        applyFocus()
+        applyOverlay()
         if prefs.typewriter { centerCaret() }
     }
 }

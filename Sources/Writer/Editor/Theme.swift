@@ -11,6 +11,7 @@ struct Theme {
     let dimmedText: NSColor
     let markup: NSColor
     let accent: NSColor
+    let partColors: [PartOfSpeech: NSColor]
     let lineHeightMultiple: CGFloat = 1.5
     let maxLineWidth: CGFloat
 
@@ -31,6 +32,9 @@ struct Theme {
             dimmedText: dark ? NSColor(hex: 0x575757) : NSColor(hex: 0xBFBFBF),
             markup: dark ? NSColor(hex: 0x6C7885) : NSColor(hex: 0x8E9AA8),
             accent: dark ? NSColor(hex: 0x4A90FF) : NSColor(hex: 0x2F7CF6),
+            partColors: dark
+                ? [.noun: NSColor(hex: 0x5B9BFF), .verb: NSColor(hex: 0xFF6B66), .adjective: NSColor(hex: 0xD8A62B), .adverb: NSColor(hex: 0xB08BE0), .conjunction: NSColor(hex: 0x5FC27A)]
+                : [.noun: NSColor(hex: 0x2F7CF6), .verb: NSColor(hex: 0xD9534F), .adjective: NSColor(hex: 0xB8860B), .adverb: NSColor(hex: 0x8E5FC7), .conjunction: NSColor(hex: 0x3F9F57)],
             maxLineWidth: averageAdvance * CGFloat(prefs.lineLength)
         )
     }
