@@ -23,6 +23,8 @@ final class EditorViewController: NSViewController {
         storage.delegate = self
         textView.delegate = self
         textView.string = text
+        textView.setSelectedRange(NSRange(location: 0, length: 0))
+        preferredContentSize = NSSize(width: 820, height: 900)
     }
 
     required init?(coder: NSCoder) { fatalError("not supported") }
@@ -48,6 +50,7 @@ final class EditorViewController: NSViewController {
         scrollView.autohidesScrollers = true
         scrollView.scrollerStyle = .overlay
         scrollView.drawsBackground = false
+        scrollView.automaticallyAdjustsContentInsets = false
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         statsBar.translatesAutoresizingMaskIntoConstraints = false
 
@@ -65,6 +68,7 @@ final class EditorViewController: NSViewController {
             statsBar.trailingAnchor.constraint(equalTo: root.trailingAnchor),
             statsBar.bottomAnchor.constraint(equalTo: root.bottomAnchor),
         ])
+        root.frame = NSRect(origin: .zero, size: preferredContentSize)
         view = root
         NotificationCenter.default.addObserver(
             self, selector: #selector(preferencesDidChange), name: .preferencesDidChange, object: nil)
@@ -74,6 +78,7 @@ final class EditorViewController: NSViewController {
     override func viewWillAppear() {
         super.viewWillAppear()
         view.window?.makeFirstResponder(textView)
+        applyTheme()
     }
 
     override func viewDidLayout() {
@@ -105,6 +110,8 @@ final class EditorViewController: NSViewController {
         textView.selectedTextAttributes = [.backgroundColor: theme.accent.withAlphaComponent(0.25)]
         textView.typingAttributes = theme.baseAttributes
         statsBar.isHidden = !prefs.showStats
+        statsBar.layer?.backgroundColor = theme.background.cgColor
+        scrollView.contentInsets = NSEdgeInsets(top: 0, left: 0, bottom: prefs.showStats ? StatsBar.height : 0, right: 0)
         rehighlightAll()
         applyFocus()
         scheduleStats()

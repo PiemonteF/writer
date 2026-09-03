@@ -15,6 +15,7 @@ final class MarkdownHighlighterTests: XCTestCase {
         XCTAssertTrue(result.contains(Span(range: NSRange(location: 4, length: 4), style: .strong)))
         XCTAssertTrue(result.contains(Span(range: NSRange(location: 2, length: 2), style: .markup)))
         XCTAssertTrue(result.contains(Span(range: NSRange(location: 8, length: 2), style: .markup)))
+        XCTAssertFalse(result.contains { $0.style == .emphasis })
     }
 
     func testEmphasis() {

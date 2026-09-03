@@ -40,7 +40,7 @@ enum MarkdownHighlighter {
     ]
 
     private static let inlineRules: [InlineRule] = [
-        InlineRule(pattern: regex(#"(?<![*\w])(\*|_)(?=\S)(.+?)(?<=\S)(\1)(?![*\w])"#), content: (2, .emphasis), markupGroups: [1, 3]),
+        InlineRule(pattern: regex(#"(?<![*\w])(\*|_)(?=[^\s*_])(.+?)(?<=[^\s*_])(\1)(?![*\w])"#), content: (2, .emphasis), markupGroups: [1, 3]),
         InlineRule(pattern: regex(#"(\*\*|__)(?=\S)(.+?)(?<=\S)(\1)"#), content: (2, .strong), markupGroups: [1, 3]),
         InlineRule(pattern: regex(#"(\[)([^\]]*)(\]\()([^)]*)(\))"#), content: (4, .url), markupGroups: [1, 3, 5]),
         InlineRule(pattern: regex(#"(`+)(.+?)(\1)"#), content: (2, .code), markupGroups: [1, 3]),
@@ -104,19 +104,27 @@ enum MarkdownHighlighter {
             let clipped = NSIntersectionRange(span.range, range)
             guard clipped.length > 0 else { continue }
             switch span.style {
-            case .heading: addTrait(.boldFontMask, to: storage, range: clipped)
-            case .strong: addTrait(.boldFontMask, to: storage, range: clipped)
-            case .emphasis: addTrait(.italicFontMask, to: storage, range: clipped)
+            case .heading, .strong: embolden(storage, range: clipped, theme: theme)
+            case .emphasis: italicize(storage, range: clipped, theme: theme)
             case .code, .codeBlock: storage.addAttribute(.font, value: theme.monoFont, range: clipped)
             case .url, .markup: storage.addAttribute(.foregroundColor, value: theme.markup, range: clipped)
             }
         }
     }
 
-    private static func addTrait(_ trait: NSFontTraitMask, to storage: NSTextStorage, range: NSRange) {
+    private static func embolden(_ storage: NSTextStorage, range: NSRange, theme: Theme) {
         storage.enumerateAttribute(.font, in: range) { value, subrange, _ in
-            guard let font = value as? NSFont else { return }
-            storage.addAttribute(.font, value: NSFontManager.shared.convert(font, toHaveTrait: trait), range: subrange)
+            let current = value as? NSFont
+            let italic = current?.fontName == theme.italicFont.fontName || current?.fontName == theme.boldItalicFont.fontName
+            storage.addAttribute(.font, value: italic ? theme.boldItalicFont : theme.boldFont, range: subrange)
+        }
+    }
+
+    private static func italicize(_ storage: NSTextStorage, range: NSRange, theme: Theme) {
+        storage.enumerateAttribute(.font, in: range) { value, subrange, _ in
+            let current = value as? NSFont
+            let bold = current?.fontName == theme.boldFont.fontName || current?.fontName == theme.boldItalicFont.fontName
+            storage.addAttribute(.font, value: bold ? theme.boldItalicFont : theme.italicFont, range: subrange)
         }
     }
 
