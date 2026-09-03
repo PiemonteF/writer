@@ -10,6 +10,7 @@ final class EditorViewController: NSViewController {
     private var spans: [Span] = []
     private var statsWork: DispatchWorkItem?
     private var prefs: Preferences { .shared }
+    var onTextChange: (() -> Void)?
 
     init(text: String) {
         let container = NSTextContainer(size: NSSize(width: 0, height: CGFloat.greatestFiniteMagnitude))
@@ -111,7 +112,7 @@ final class EditorViewController: NSViewController {
         textView.typingAttributes = theme.baseAttributes
         statsBar.isHidden = !prefs.showStats
         statsBar.layer?.backgroundColor = theme.background.cgColor
-        scrollView.contentInsets = NSEdgeInsets(top: 0, left: 0, bottom: prefs.showStats ? StatsBar.height : 0, right: 0)
+        updateContentInsets()
         rehighlightAll()
         applyFocus()
         scheduleStats()
@@ -126,7 +127,15 @@ final class EditorViewController: NSViewController {
         storage.endEditing()
     }
 
+    private func updateContentInsets() {
+        let insets = NSEdgeInsets(top: view.safeAreaInsets.top, left: 0, bottom: prefs.showStats ? StatsBar.height : 0, right: 0)
+        if scrollView.contentInsets.top != insets.top || scrollView.contentInsets.bottom != insets.bottom {
+            scrollView.contentInsets = insets
+        }
+    }
+
     private func updateInsets() {
+        updateContentInsets()
         let width = scrollView.contentView.bounds.width
         let visibleHeight = scrollView.contentView.bounds.height
         guard width > 0 else { return }
@@ -221,6 +230,7 @@ extension EditorViewController: NSTextViewDelegate {
     func textDidChange(_ notification: Notification) {
         applyFocus()
         scheduleStats()
+        onTextChange?()
         if prefs.typewriter { centerCaret() }
     }
 

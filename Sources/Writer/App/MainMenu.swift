@@ -23,6 +23,11 @@ enum MainMenu {
             item("Rename…", #selector(NSDocument.rename(_:))),
             item("Move To…", #selector(NSDocument.move(_:))),
             item("Revert To Saved", #selector(NSDocument.revertToSaved(_:))),
+            .separator(),
+            submenu("Export", [
+                item("HTML…", #selector(EditorWindowController.exportHTML(_:))),
+                item("PDF…", #selector(EditorWindowController.exportPDF(_:))),
+            ]),
         ]))
         main.addItem(submenu("Edit", [
             item("Undo", Selector(("undo:")), "z"),
@@ -32,6 +37,7 @@ enum MainMenu {
             item("Copy", #selector(NSText.copy(_:)), "c"),
             item("Paste", #selector(NSText.paste(_:)), "v"),
             item("Select All", #selector(NSText.selectAll(_:)), "a"),
+            item("Copy HTML", #selector(EditorWindowController.copyHTML(_:)), "c", [.command, .option]),
             .separator(),
             submenu("Find", [
                 item("Find…", #selector(NSTextView.performTextFinderAction(_:)), "f", tag: NSTextFinder.Action.showFindInterface.rawValue),
@@ -62,6 +68,8 @@ enum MainMenu {
                 item("Paragraph", #selector(AppDelegate.setFocusMode(_:)), represents: FocusMode.paragraph),
             ]),
             item("Typewriter Mode", #selector(AppDelegate.toggleTypewriter(_:)), "t", [.command, .option]),
+            .separator(),
+            item("Preview", #selector(EditorWindowController.togglePreview(_:)), "r"),
             .separator(),
             item("Night Mode", #selector(AppDelegate.toggleNightMode(_:)), "n", [.command, .option]),
             submenu("Appearance", Appearance.allCases.map {
