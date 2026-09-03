@@ -17,6 +17,8 @@ enum MainMenu {
             item("Open…", #selector(NSDocumentController.openDocument(_:)), "o"),
             openRecent(),
             .separator(),
+            item("Choose Library Folder…", #selector(AppDelegate.chooseLibraryFolder(_:))),
+            .separator(),
             item("Close", #selector(NSWindow.performClose(_:)), "w"),
             item("Save…", #selector(NSDocument.save(_:)), "s"),
             item("Duplicate", #selector(NSDocument.duplicate(_:)), "s", [.command, .shift]),
@@ -70,6 +72,7 @@ enum MainMenu {
             item("Typewriter Mode", #selector(AppDelegate.toggleTypewriter(_:)), "t", [.command, .option]),
             .separator(),
             item("Preview", #selector(EditorWindowController.togglePreview(_:)), "r"),
+            item("Library", #selector(EditorWindowController.toggleLibrary(_:)), "l", [.command, .option]),
             .separator(),
             item("Night Mode", #selector(AppDelegate.toggleNightMode(_:)), "n", [.command, .option]),
             submenu("Appearance", Appearance.allCases.map {

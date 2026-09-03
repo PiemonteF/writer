@@ -69,6 +69,19 @@ final class Preferences {
         set { store(newValue, "showStats") }
     }
 
+    var libraryURL: URL {
+        get {
+            defaults.string(forKey: "libraryPath").map { URL(fileURLWithPath: $0) }
+                ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents/Writer")
+        }
+        set { store(newValue.path, "libraryPath") }
+    }
+
+    var showLibrary: Bool {
+        get { defaults.bool(forKey: "showLibrary") }
+        set { store(newValue, "showLibrary") }
+    }
+
     var lineLength: Int {
         get { defaults.object(forKey: "lineLength") as? Int ?? 66 }
         set { store(newValue, "lineLength") }

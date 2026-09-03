@@ -4,8 +4,10 @@ import UniformTypeIdentifiers
 final class EditorWindowController: NSWindowController {
     let editor: EditorViewController
     private let preview = PreviewViewController()
+    private let library = LibraryViewController()
     private let split = NSSplitViewController()
     private let previewItem: NSSplitViewItem
+    private let libraryItem: NSSplitViewItem
     private var exporter: PreviewViewController?
 
     init(document: Document) {
@@ -14,8 +16,13 @@ final class EditorWindowController: NSWindowController {
         previewItem.minimumThickness = 320
         previewItem.canCollapse = true
         previewItem.isCollapsed = true
+        libraryItem = NSSplitViewItem(sidebarWithViewController: library)
+        libraryItem.minimumThickness = 180
+        libraryItem.maximumThickness = 360
+        libraryItem.isCollapsed = !Preferences.shared.showLibrary
         let editorItem = NSSplitViewItem(viewController: editor)
         editorItem.minimumThickness = 360
+        split.addSplitViewItem(libraryItem)
         split.addSplitViewItem(editorItem)
         split.addSplitViewItem(previewItem)
         split.splitView.dividerStyle = .thin
@@ -55,6 +62,12 @@ final class EditorWindowController: NSWindowController {
             refreshPreview(immediately: true)
         }
         previewItem.animator().isCollapsed = !showing
+    }
+
+    @IBAction func toggleLibrary(_ sender: Any?) {
+        let showing = libraryItem.isCollapsed
+        Preferences.shared.showLibrary = showing
+        libraryItem.animator().isCollapsed = !showing
     }
 
     @IBAction func copyHTML(_ sender: Any?) {
@@ -103,6 +116,9 @@ extension EditorWindowController: NSMenuItemValidation {
     func validateMenuItem(_ item: NSMenuItem) -> Bool {
         if item.action == #selector(togglePreview) {
             item.state = previewItem.isCollapsed ? .off : .on
+        }
+        if item.action == #selector(toggleLibrary) {
+            item.state = libraryItem.isCollapsed ? .off : .on
         }
         return true
     }

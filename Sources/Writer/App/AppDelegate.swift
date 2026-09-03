@@ -31,6 +31,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    @IBAction func chooseLibraryFolder(_ sender: Any?) {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.canCreateDirectories = true
+        panel.directoryURL = Preferences.shared.libraryURL
+        panel.prompt = "Use Folder"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        Preferences.shared.libraryURL = url
+    }
+
     @IBAction func toggleFocusMode(_ sender: Any?) {
         let prefs = Preferences.shared
         prefs.focusMode = prefs.focusMode == .off ? .sentence : .off
