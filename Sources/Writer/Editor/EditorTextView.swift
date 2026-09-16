@@ -4,6 +4,45 @@ final class EditorTextView: NSTextView {
     private static let headingPrefix = try! NSRegularExpression(pattern: #"^[ \t]{0,3}#{1,6}[ \t]*"#)
     private static let authorshipType = NSPasteboard.PasteboardType("com.absonson.writer.authorship")
 
+    private(set) var isSelectingWithMouse = false
+    var didFinishMouseSelection: (() -> Void)?
+
+    override func mouseDown(with event: NSEvent) {
+        // Keep glyph geometry stable throughout AppKit's click/drag hit testing.
+        isSelectingWithMouse = true
+        super.mouseDown(with: event)
+        isSelectingWithMouse = false
+        didFinishMouseSelection?()
+    }
+
+    var renderedFences: [NSRange] = []
+    var renderedRules: [NSRange] = []
+
+    override func deleteBackward(_ sender: Any?) {
+        if Preferences.shared.livePreview,
+           let range = LiveMarkdown.ruleToDelete(in: string, selection: selectedRange(), rules: renderedRules + renderedFences) {
+            insertText("", replacementRange: range)
+        } else {
+            super.deleteBackward(sender)
+        }
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
+        guard let layoutManager, let textContainer else { return }
+        NSColor.separatorColor.setStroke()
+        for range in renderedRules where NSMaxRange(range) <= (string as NSString).length {
+            let glyph = layoutManager.glyphIndexForCharacter(at: range.location)
+            let rect = layoutManager.lineFragmentRect(forGlyphAt: glyph, effectiveRange: nil)
+                .offsetBy(dx: textContainerOrigin.x, dy: textContainerOrigin.y)
+            guard rect.intersects(dirtyRect) else { continue }
+            let path = NSBezierPath()
+            path.move(to: NSPoint(x: rect.minX, y: rect.midY))
+            path.line(to: NSPoint(x: rect.minX + textContainer.size.width, y: rect.midY))
+            path.stroke()
+        }
+    }
+
     var inputAttribution: Author = .selfTyped
     var attributedSlice: Authorship?
     var attributionLocked = false

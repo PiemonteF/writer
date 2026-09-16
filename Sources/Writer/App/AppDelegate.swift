@@ -76,8 +76,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @IBAction func setEditorFont(_ sender: NSMenuItem) {
         guard let font = sender.representedObject as? EditorFont else { return }
+        Preferences.shared.systemFont = nil
         Preferences.shared.font = font
     }
+
+    @IBAction func setSystemFont(_ sender: NSMenuItem) {
+        guard let family = sender.representedObject as? String else { return }
+        Preferences.shared.systemFont = family
+    }
+
+    @IBAction func toggleLivePreview(_ sender: Any?) { Preferences.shared.livePreview.toggle() }
+    @IBAction func toggleOutline(_ sender: Any?) { Preferences.shared.showOutline.toggle() }
 
     @IBAction func toggleSyntaxHighlight(_ sender: Any?) {
         let prefs = Preferences.shared
@@ -135,7 +144,10 @@ extension AppDelegate: NSMenuItemValidation {
         case #selector(togglePartOfSpeech): item.state = (item.representedObject as? PartOfSpeech).map(prefs.highlightedParts.contains) == true ? .on : .off
         case #selector(toggleStyleCheck): item.state = prefs.styleChecks.isEmpty ? .off : .on
         case #selector(toggleStyleIssue): item.state = (item.representedObject as? StyleIssue).map(prefs.styleChecks.contains) == true ? .on : .off
-        case #selector(setEditorFont): item.state = item.representedObject as? EditorFont == prefs.font ? .on : .off
+        case #selector(setEditorFont): item.state = prefs.systemFont == nil && item.representedObject as? EditorFont == prefs.font ? .on : .off
+        case #selector(setSystemFont): item.state = item.representedObject as? String == prefs.systemFont ? .on : .off
+        case #selector(toggleLivePreview): item.state = prefs.livePreview ? .on : .off
+        case #selector(toggleOutline): item.state = prefs.showOutline ? .on : .off
         default: break
         }
         return true

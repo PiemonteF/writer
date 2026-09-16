@@ -17,7 +17,7 @@ struct Theme {
 
     static func make(_ prefs: Preferences, dark: Bool) -> Theme {
         let size = prefs.fontSize
-        let family = prefs.font.familyName
+        let family = prefs.systemFont ?? prefs.font.familyName
         let regular = face(family, size: size, traits: [])
         let sample = "abcdefghijklmnopqrstuvwxyz" as NSString
         let averageAdvance = sample.size(withAttributes: [.font: regular]).width / CGFloat(sample.length)
@@ -41,6 +41,7 @@ struct Theme {
 
     private static func face(_ family: String, size: CGFloat, traits: NSFontTraitMask) -> NSFont {
         NSFontManager.shared.font(withFamily: family, traits: traits, weight: 5, size: size)
+            ?? NSFontManager.shared.font(withFamily: family, traits: [], weight: 5, size: size)
             ?? NSFont.monospacedSystemFont(ofSize: size, weight: traits.contains(.boldFontMask) ? .bold : .regular)
     }
 

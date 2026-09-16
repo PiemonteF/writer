@@ -6,6 +6,11 @@ enum MainMenu {
         main.addItem(submenu("Writer", [
             item("About Writer", #selector(NSApplication.orderFrontStandardAboutPanel(_:))),
             .separator(),
+            submenu("Settings", [
+                item("Live Markdown Preview", #selector(AppDelegate.toggleLivePreview(_:)), "r", [.command, .option]),
+                item("Heading Tree", #selector(AppDelegate.toggleOutline(_:)), "o", [.command, .option]),
+            ]),
+            .separator(),
             item("Hide Writer", #selector(NSApplication.hide(_:)), "h"),
             item("Hide Others", #selector(NSApplication.hideOtherApplications(_:)), "h", [.command, .option]),
             item("Show All", #selector(NSApplication.unhideAllApplications(_:))),
@@ -92,7 +97,9 @@ enum MainMenu {
             .separator(),
             submenu("Font", EditorFont.allCases.map {
                 item($0.title, #selector(AppDelegate.setEditorFont(_:)), represents: $0)
-            }),
+            } + [.separator(), submenu("System fonts", NSFontManager.shared.availableFontFamilies.sorted {
+                $0.localizedCaseInsensitiveCompare($1) == .orderedAscending
+            }.map { item($0, #selector(AppDelegate.setSystemFont(_:)), represents: $0) })]),
             item("Bigger", #selector(AppDelegate.biggerFont(_:)), "+"),
             item("Smaller", #selector(AppDelegate.smallerFont(_:)), "-"),
             .separator(),

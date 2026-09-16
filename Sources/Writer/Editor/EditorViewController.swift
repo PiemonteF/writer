@@ -5,7 +5,11 @@ final class EditorViewController: NSViewController {
     private let scrollView = NSScrollView()
     private let statsBar = StatsBar()
     private let storage = NSTextStorage()
-    private let layoutManager = NSLayoutManager()
+    private let layoutManager = MarkdownLayoutManager()
+    private let headingTree = HeadingTree()
+    private var treeHeight: NSLayoutConstraint?
+    private var headings: [MarkdownHeading] = []
+    private var styling = false
     private var theme: Theme
     private var spans: [Span] = []
     private var statsWork: DispatchWorkItem?
@@ -46,6 +50,9 @@ final class EditorViewController: NSViewController {
             }
             return self.authorship.slice(range)
         }
+        textView.didFinishMouseSelection = { [weak self] in
+            self?.refreshSelection()
+        }
         textView.styleRangeAt = { [weak self] location in
             self?.styleSpans.first { NSLocationInRange(location, $0.range) }?.range
         }
@@ -83,7 +90,25 @@ final class EditorViewController: NSViewController {
         root.onAppearanceChange = { [weak self] in self?.applyTheme() }
         root.addSubview(scrollView)
         root.addSubview(statsBar)
+        headingTree.translatesAutoresizingMaskIntoConstraints = false
+        root.addSubview(headingTree)
+        headingTree.onSelect = { [weak self] index in
+            guard let self, self.headings.indices.contains(index) else { return }
+            let range = self.headings[index].range
+            self.navigate(to: range)
+        }
+        scrollView.contentView.postsBoundsChangedNotifications = true
+        NotificationCenter.default.addObserver(self, selector: #selector(updateVisibleHeading),
+            name: NSView.boundsDidChangeNotification, object: scrollView.contentView)
+        let height = headingTree.heightAnchor.constraint(equalToConstant: 48)
+        height.priority = .defaultHigh
+        treeHeight = height
         NSLayoutConstraint.activate([
+            height,
+            headingTree.topAnchor.constraint(equalTo: root.safeAreaLayoutGuide.topAnchor, constant: 12),
+            headingTree.trailingAnchor.constraint(equalTo: root.trailingAnchor, constant: -16),
+            headingTree.widthAnchor.constraint(equalToConstant: 180),
+            headingTree.heightAnchor.constraint(lessThanOrEqualTo: root.heightAnchor, multiplier: 0.35),
             scrollView.topAnchor.constraint(equalTo: root.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: root.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: root.trailingAnchor),
@@ -108,6 +133,7 @@ final class EditorViewController: NSViewController {
     override func viewDidLayout() {
         super.viewDidLayout()
         updateInsets()
+        updateVisibleHeading()
     }
 
     func load(_ text: String, authorship loaded: Authorship? = nil) {
@@ -141,6 +167,7 @@ final class EditorViewController: NSViewController {
         textView.selectedTextAttributes = [.backgroundColor: theme.accent.withAlphaComponent(0.25)]
         textView.typingAttributes = theme.baseAttributes
         statsBar.isHidden = !prefs.showStats
+        headingTree.isHidden = !prefs.showOutline
         statsBar.layer?.backgroundColor = theme.background.cgColor
         updateContentInsets()
         rehighlightAll()
@@ -152,11 +179,57 @@ final class EditorViewController: NSViewController {
         if prefs.typewriter { centerCaret() }
     }
 
+    // ponytail: restyle the document on caret changes; cache paragraph styling if large files lag.
     private func rehighlightAll() {
+        guard !styling else { return }
+        styling = true
+        defer { styling = false }
         spans = MarkdownHighlighter.spans(in: storage.string)
         storage.beginEditing()
         MarkdownHighlighter.apply(spans, to: storage, theme: theme, in: NSRange(location: 0, length: storage.length))
+        if prefs.livePreview {
+            LiveMarkdown.apply(to: storage, spans: spans, selection: textView.selectedRange(), theme: theme)
+        }
         storage.endEditing()
+        layoutManager.invalidateGlyphs(forCharacterRange: NSRange(location: 0, length: storage.length), changeInLength: 0, actualCharacterRange: nil)
+        textView.renderedRules = prefs.livePreview ? LiveMarkdown.rules(in: storage.string, spans: spans) : []
+        textView.renderedFences = prefs.livePreview ? spans.filter { $0.style == .codeFence }.map(\.range) : []
+        layoutManager.codeBlockRanges = prefs.livePreview ? LiveMarkdown.codeBlocks(in: storage.string, spans: spans) : []
+        layoutManager.quoteRanges = []
+        if prefs.livePreview {
+            for span in spans where span.style == .quote {
+                let line = (storage.string as NSString).lineRange(for: span.range)
+                if let last = layoutManager.quoteRanges.last, NSMaxRange(last) == line.location {
+                    layoutManager.quoteRanges[layoutManager.quoteRanges.count - 1] = NSUnionRange(last, line)
+                } else {
+                    layoutManager.quoteRanges.append(line)
+                }
+            }
+        }
+        textView.needsDisplay = true
+        let fresh = MarkdownHeading.headings(in: storage.string, spans: spans)
+        if fresh != headings { headings = fresh; headingTree.update(headings) }
+        treeHeight?.constant = max(48, CGFloat(headings.count) * 21 + 16)
+        updateVisibleHeading()
+    }
+
+    private func navigate(to range: NSRange) {
+        view.window?.makeFirstResponder(textView)
+        textView.setSelectedRange(NSRange(location: range.location, length: 0))
+        guard let container = textView.textContainer else { return }
+        layoutManager.ensureLayout(for: container)
+        let line = layoutManager.lineFragmentRect(forGlyphAt: layoutManager.glyphIndexForCharacter(at: range.location), effectiveRange: nil)
+        textView.scroll(NSPoint(x: 0, y: max(0, line.minY + textView.textContainerOrigin.y - 12)))
+        updateVisibleHeading()
+    }
+
+    @objc private func updateVisibleHeading() {
+        guard isViewLoaded, prefs.showOutline, let container = textView.textContainer, storage.length > 0 else { return }
+        layoutManager.ensureLayout(for: container)
+        let point = NSPoint(x: 0, y: max(0, scrollView.contentView.bounds.minY - textView.textContainerOrigin.y))
+        let glyph = layoutManager.glyphIndex(for: point, in: container)
+        let character = layoutManager.characterIndexForGlyph(at: min(glyph, max(0, layoutManager.numberOfGlyphs - 1)))
+        headingTree.highlight(headings.lastIndex { $0.range.location <= character } ?? (headings.isEmpty ? nil : 0))
     }
 
     private func updateContentInsets() {
@@ -189,7 +262,7 @@ final class EditorViewController: NSViewController {
         layoutManager.removeTemporaryAttribute(.foregroundColor, forCharacterRange: full)
         layoutManager.removeTemporaryAttribute(.strikethroughStyle, forCharacterRange: full)
         layoutManager.removeTemporaryAttribute(.strikethroughColor, forCharacterRange: full)
-        let literal = spans.filter { [.code, .codeBlock, .url, .markup].contains($0.style) }.map(\.range)
+        let literal = spans.filter { [.code, .codeBlock, .codeFence, .url, .markup].contains($0.style) }.map(\.range)
         if prefs.showAuthorship {
             applyAuthorshipOverlay(in: full)
         } else if partSpansText == storage.string {
@@ -406,6 +479,7 @@ extension EditorViewController: NSTextViewDelegate {
     }
 
     func textDidChange(_ notification: Notification) {
+        rehighlightAll()
         applyOverlay()
         scheduleParts()
         scheduleStyle()
@@ -415,6 +489,13 @@ extension EditorViewController: NSTextViewDelegate {
     }
 
     func textViewDidChangeSelection(_ notification: Notification) {
+        guard !textView.isSelectingWithMouse else { return }
+        refreshSelection()
+    }
+
+    fileprivate func refreshSelection() {
+        guard isViewLoaded, !styling else { return }
+        if prefs.livePreview { rehighlightAll() }
         applyOverlay()
         if prefs.typewriter { centerCaret() }
     }

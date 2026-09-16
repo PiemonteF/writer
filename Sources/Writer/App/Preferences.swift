@@ -44,6 +44,27 @@ final class Preferences {
         set { store(newValue.rawValue, "font") }
     }
 
+    var systemFont: String? {
+        get { defaults.string(forKey: "systemFont") }
+        set {
+            if let newValue { store(newValue, "systemFont") }
+            else {
+                defaults.removeObject(forKey: "systemFont")
+                NotificationCenter.default.post(name: .preferencesDidChange, object: self)
+            }
+        }
+    }
+
+    var livePreview: Bool {
+        get { defaults.bool(forKey: "livePreview") }
+        set { store(newValue, "livePreview") }
+    }
+
+    var showOutline: Bool {
+        get { defaults.bool(forKey: "showOutline") }
+        set { store(newValue, "showOutline") }
+    }
+
     var fontSize: CGFloat {
         get { defaults.object(forKey: "fontSize") as? CGFloat ?? 17 }
         set { store(newValue, "fontSize") }

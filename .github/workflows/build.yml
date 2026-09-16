@@ -1,0 +1,61 @@
+name: Build Writer
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-14
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: swift test
+      - name: Build universal application
+        env:
+          UNIVERSAL: '1'
+        run: scripts/build-app.sh release
+      - name: Archive application
+        run: ditto -c -k --sequesterRsrc --keepParent build/Writer.app build/Writer-macOS.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Writer-macOS
+          path: build/Writer-macOS.zip
+          if-no-files-found: error
+      - name: Publish release asset
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "build-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            build/Writer-macOS.zip \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Writer main build ${GITHUB_RUN_NUMBER}" \
+            --notes "Universal macOS app for Apple Silicon and Intel, built from ${GITHUB_SHA}. Ad-hoc signed; not notarized." \
+            --latest
+      - uses: oras-project/setup-oras@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - name: Publish to GitHub Packages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          package="ghcr.io/$(printf '%s' "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')"
+          printf '%s' "$GH_TOKEN" | oras login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          oras push "$package:$GITHUB_SHA" \
+            --artifact-type application/vnd.writer.macos \
+            --annotation "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
+            --annotation "org.opencontainers.image.revision=$GITHUB_SHA" \
+            Writer-macOS.zip:application/zip
+          oras tag "$package:$GITHUB_SHA" latest

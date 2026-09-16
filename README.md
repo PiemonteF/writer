@@ -20,6 +20,16 @@ Authorship, ⇧⌘A. What you typed stays black. What was pasted or generated is
   <img src="docs/screenshots/authorship-light.png" width="720" alt="Authorship: your words in black, pasted AI in color">
 </p>
 
+## Install from a release
+
+Requires macOS 14 or later, on Apple Silicon or Intel.
+
+1. Download `Writer-macOS.zip` from the [latest release](../../releases/latest).
+2. Unzip it and drag `Writer.app` into **Applications**.
+3. Open Writer. It has no Apple developer signature or notarization. If macOS
+   blocks it, open **System Settings > Privacy & Security**, click **Open Anyway**
+   for Writer, then confirm **Open**. See [Apple's instructions](https://support.apple.com/en-us/102445).
+
 ## Run it
 
 macOS 14 or later, and Xcode 16 at `/Applications/Xcode.app`. The Makefile points `DEVELOPER_DIR` at that copy because the Command Line Tools SwiftPM on this machine cannot link package manifests.
@@ -68,6 +78,11 @@ Library, ⌥⌘L. A folder of Markdown and text files, with search. File > Choos
 
 ## What it does
 
+- Live Markdown Preview (⌥⌘R): edit formatted Markdown inline, with one-backspace divider deletion, boxed code blocks with thin editable fences, and GitHub-style quotes.
+- Heading Tree (⌥⌘O): a floating, clickable outline of `#`, `##` and `###` headings, with the visible section highlighted, hand cursors, and a smooth hover fade.
+- Both modes are off by default; enable them under **Writer > Settings**.
+- Choose any installed font under **View > Font > System fonts**.
+- Every push to `main` builds a universal macOS app and publishes the ZIP to Releases, GitHub Packages, and Actions artifacts.
 - Centered column, dimmed markup, bold headings, italic emphasis, monospaced code. Fonts are iA Writer Duo, Quattro, and Mono, bundled, SIL OFL.
 - Typewriter Mode (⌥⌘T) keeps the caret line centered.
 - Authorship (⇧⌘A). Paste as / Mark as live under Authors.
@@ -82,6 +97,8 @@ Library, ⌥⌘L. A folder of Markdown and text files, with search. File > Choos
 | --- | --- |
 | Focus Mode | ⌘D |
 | Preview | ⌘R |
+| Live Markdown Preview | ⌥⌘R |
+| Heading Tree | ⌥⌘O |
 | Night Mode | ⌥⌘N |
 | Typewriter Mode | ⌥⌘T |
 | Library | ⌥⌘L |

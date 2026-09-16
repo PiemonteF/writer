@@ -6,6 +6,8 @@ enum MarkdownStyle: Hashable {
     case emphasis
     case code
     case codeBlock
+    case codeFence
+    case quote
     case url
     case markup
 }
@@ -29,13 +31,13 @@ enum MarkdownHighlighter {
         let markupGroups: [Int]
     }
 
-    private static let fence = regex(#"^\s{0,3}(```|~~~)"#)
+    private static let fence = regex(#"^[ \t]{0,3}(`{3,}|~{3,})(.*)$"#)
 
     private static let lineRules: [LineRule] = [
         LineRule(pattern: regex(#"^\s{0,3}(#{1,6})[ \t]+\S.*$"#), line: nil, markupGroups: [1], headingGroup: 1),
         LineRule(pattern: regex(#"^\s{0,3}(#{1,6})[ \t]*$"#), line: nil, markupGroups: [1], headingGroup: 1),
         LineRule(pattern: regex(#"^\s{0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$"#), line: .markup, markupGroups: [], headingGroup: nil),
-        LineRule(pattern: regex(#"^\s*((?:>[ \t]?)+)"#), line: nil, markupGroups: [1], headingGroup: nil),
+        LineRule(pattern: regex(#"^\s*((?:>[ \t]?)+)"#), line: .quote, markupGroups: [1], headingGroup: nil),
         LineRule(pattern: regex(#"^\s*(?:>[ \t]?)*\s*([-*+]|\d{1,9}[.)])[ \t]+"#), line: nil, markupGroups: [1], headingGroup: nil),
     ]
 
@@ -49,14 +51,29 @@ enum MarkdownHighlighter {
     static func spans(in text: String) -> [Span] {
         let source = text as NSString
         var result: [Span] = []
-        var inFence = false
+        var openFence: (marker: Character, length: Int)?
         source.enumerateSubstrings(in: NSRange(location: 0, length: source.length), options: [.byLines, .substringNotRequired]) { _, lineRange, _, _ in
-            if fence.firstMatch(in: text, range: lineRange) != nil {
-                inFence.toggle()
-                result.append(Span(range: lineRange, style: .markup))
-                return
+            if let match = fence.firstMatch(in: text, range: lineRange) {
+                let marker = source.substring(with: match.range(at: 1))
+                let suffix = source.substring(with: match.range(at: 2))
+                if let opened = openFence {
+                    if marker.first == opened.marker, marker.count >= opened.length,
+                       suffix.trimmingCharacters(in: .whitespaces).isEmpty {
+                        openFence = nil
+                        result.append(Span(range: lineRange, style: .markup))
+                        result.append(Span(range: lineRange, style: .codeFence))
+                    } else {
+                        result.append(Span(range: lineRange, style: .codeBlock))
+                    }
+                    return
+                } else if marker.first != "`" || !suffix.contains("`") {
+                    openFence = (marker.first!, marker.count)
+                    result.append(Span(range: lineRange, style: .markup))
+                    result.append(Span(range: lineRange, style: .codeFence))
+                    return
+                }
             }
-            if inFence {
+            if openFence != nil {
                 result.append(Span(range: lineRange, style: .codeBlock))
                 return
             }
@@ -72,7 +89,7 @@ enum MarkdownHighlighter {
             guard let match = rule.pattern.firstMatch(in: text, range: lineRange) else { continue }
             if let style = rule.line {
                 result.append(Span(range: lineRange, style: style))
-                inlineOnly = false
+                if style != .quote { inlineOnly = false }
             }
             if let group = rule.headingGroup {
                 result.append(Span(range: lineRange, style: .heading(level: match.range(at: group).length)))
@@ -83,8 +100,12 @@ enum MarkdownHighlighter {
             }
         }
         guard inlineOnly else { return result }
-        for rule in inlineRules {
+        // Code content is literal, including Markdown-looking delimiters inside it.
+        var codeRanges: [NSRange] = []
+        for rule in [inlineRules.last!] + inlineRules.dropLast() {
             for match in rule.pattern.matches(in: text, range: lineRange) {
+                guard !codeRanges.contains(where: { NSIntersectionRange($0, match.range).length > 0 }) else { continue }
+                if rule.content?.style == .code { codeRanges.append(match.range) }
                 if let content = rule.content {
                     let contentRange = match.range(at: content.group)
                     if contentRange.length > 0 { result.append(Span(range: contentRange, style: content.style)) }
@@ -104,10 +125,11 @@ enum MarkdownHighlighter {
             let clipped = NSIntersectionRange(span.range, range)
             guard clipped.length > 0 else { continue }
             switch span.style {
+            case .quote: break
             case .heading, .strong: embolden(storage, range: clipped, theme: theme)
             case .emphasis: italicize(storage, range: clipped, theme: theme)
             case .code, .codeBlock: storage.addAttribute(.font, value: theme.monoFont, range: clipped)
-            case .url, .markup: storage.addAttribute(.foregroundColor, value: theme.markup, range: clipped)
+            case .url, .markup, .codeFence: storage.addAttribute(.foregroundColor, value: theme.markup, range: clipped)
             }
         }
     }
