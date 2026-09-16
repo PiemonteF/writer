@@ -66,6 +66,52 @@ Library, ⌥⌘L. A folder of Markdown and text files, with search. File > Choos
 
 <img src="docs/screenshots/library-dark.png" width="820" alt="Library sidebar next to the editor">
 
+## Live editing and navigation
+
+Under **Writer > Settings**, enable **Live Markdown Preview** (⌥⌘R) or
+**Heading Tree** (⌥⌘O). Both are off by default and remembered across launches.
+
+Live preview formats headings, emphasis, links, lists, quotes, code and dividers
+inside the editor. The paragraph being edited reveals its Markdown markers;
+other paragraphs hide them. The document and clipboard still contain plain
+Markdown. Backspace on a divider, or immediately after its newline, deletes the
+whole divider in one undoable edit. Code blocks have rounded containers; their
+fence rows collapse to thin padding and reveal the backticks when edited. Quote
+blocks use an indented, muted style with a left border. The separate HTML Preview remains available
+for the complete rendered document, including images and tables.
+
+The heading tree sits at the upper right, follows `#`, `##` and `###` headings,
+and excludes fenced code. Its rounded container fades smoothly until hovered,
+highlights the section at the top of the viewport, and lets you click a heading
+to navigate. Heading links show a pointing-hand cursor. Reduced Motion disables
+the fade animation.
+
+Choose any installed font family from **View > Font > System fonts**.
+Select Duo, Quattro or Mono to return to a bundled font.
+
+## Automated builds
+
+Every push to `main` tests and builds a universal macOS app (Apple Silicon and
+Intel), then publishes `Writer-macOS.zip` to the repository's **Packages** area
+at `ghcr.io/piemontef/writer`, tagged with the commit SHA and `latest`.
+The ZIP is also downloadable from the workflow's **Artifacts** section.
+Pull requests build and test without publishing packages.
+
+GitHub Packages stores the ZIP as an OCI artifact; download with
+[ORAS](https://oras.land/docs/commands/oras_pull/):
+
+```sh
+oras pull ghcr.io/piemontef/writer:latest
+unzip Writer-macOS.zip
+open Writer.app
+```
+
+Forks publish under their own lowercase owner/repository path. GitHub creates
+packages as private by default; maintainers can change package visibility in
+GitHub's package settings. Private downloads require `oras login ghcr.io` with
+package read access. Builds use only an ad-hoc signature, with no Apple developer
+certificate or notarization.
+
 ## What it does
 
 - Centered column, dimmed markup, bold headings, italic emphasis, monospaced code. Fonts are iA Writer Duo, Quattro, and Mono, bundled, SIL OFL.
@@ -82,6 +128,8 @@ Library, ⌥⌘L. A folder of Markdown and text files, with search. File > Choos
 | --- | --- |
 | Focus Mode | ⌘D |
 | Preview | ⌘R |
+| Live Markdown Preview | ⌥⌘R |
+| Heading Tree | ⌥⌘O |
 | Night Mode | ⌥⌘N |
 | Typewriter Mode | ⌥⌘T |
 | Library | ⌥⌘L |
