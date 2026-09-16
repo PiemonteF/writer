@@ -20,6 +20,16 @@ Authorship, ⇧⌘A. What you typed stays black. What was pasted or generated is
   <img src="docs/screenshots/authorship-light.png" width="720" alt="Authorship: your words in black, pasted AI in color">
 </p>
 
+## Install from a release
+
+Requires macOS 14 or later, on Apple Silicon or Intel.
+
+1. Download `Writer-macOS.zip` from the [latest release](../../releases/latest).
+2. Unzip it and drag `Writer.app` into **Applications**.
+3. Open Writer. It has no Apple developer signature or notarization. If macOS
+   blocks it, open **System Settings > Privacy & Security**, click **Open Anyway**
+   for Writer, then confirm **Open**. See [Apple's instructions](https://support.apple.com/en-us/102445).
+
 ## Run it
 
 macOS 14 or later, and Xcode 16 at `/Applications/Xcode.app`. The Makefile points `DEVELOPER_DIR` at that copy because the Command Line Tools SwiftPM on this machine cannot link package manifests.
@@ -66,58 +76,13 @@ Library, ⌥⌘L. A folder of Markdown and text files, with search. File > Choos
 
 <img src="docs/screenshots/library-dark.png" width="820" alt="Library sidebar next to the editor">
 
-## Live editing and navigation
-
-Under **Writer > Settings**, enable **Live Markdown Preview** (⌥⌘R) or
-**Heading Tree** (⌥⌘O). Both are off by default and remembered across launches.
-
-Live preview formats headings, emphasis, links, lists, quotes, code and dividers
-inside the editor. The paragraph being edited reveals its Markdown markers;
-other paragraphs hide them. The document and clipboard still contain plain
-Markdown. Backspace on a divider, or immediately after its newline, deletes the
-whole divider in one undoable edit. Code blocks have rounded containers; their
-fence rows collapse to thin padding and reveal the backticks when edited. Quote
-blocks use an indented, muted style with a left border. The separate HTML Preview remains available
-for the complete rendered document, including images and tables.
-
-The heading tree sits at the upper right, follows `#`, `##` and `###` headings,
-and excludes fenced code. Its rounded container fades smoothly until hovered,
-highlights the section at the top of the viewport, and lets you click a heading
-to navigate. Heading links show a pointing-hand cursor. Reduced Motion disables
-the fade animation.
-
-Choose any installed font family from **View > Font > System fonts**.
-Select Duo, Quattro or Mono to return to a bundled font.
-
-## Automated builds
-
-Every push to `main` tests and builds a universal macOS app (Apple Silicon and
-Intel), then publishes `Writer-macOS.zip` as an asset on a new **Release**.
-Open the repository's **Releases** section and download the ZIP from the latest
-release's **Assets** list. Each release points to the exact commit that built it;
-reruns create a separate release.
-
-The ZIP is also published to **Packages** at `ghcr.io/piemontef/writer`, tagged
-with the commit SHA and `latest`, and to the workflow's **Artifacts** section.
-Pull requests build and test without publishing releases or packages.
-
-GitHub Packages stores the ZIP as an OCI artifact; download with
-[ORAS](https://oras.land/docs/commands/oras_pull/):
-
-```sh
-oras pull ghcr.io/piemontef/writer:latest
-unzip Writer-macOS.zip
-open Writer.app
-```
-
-Forks publish under their own lowercase owner/repository path. GitHub creates
-packages as private by default; maintainers can change package visibility in
-GitHub's package settings. Private downloads require `oras login ghcr.io` with
-package read access. Builds use only an ad-hoc signature, with no Apple developer
-certificate or notarization.
-
 ## What it does
 
+- Live Markdown Preview (⌥⌘R): edit formatted Markdown inline, with one-backspace divider deletion, boxed code blocks with thin editable fences, and GitHub-style quotes.
+- Heading Tree (⌥⌘O): a floating, clickable outline of `#`, `##` and `###` headings, with the visible section highlighted, hand cursors, and a smooth hover fade.
+- Both modes are off by default; enable them under **Writer > Settings**.
+- Choose any installed font under **View > Font > System fonts**.
+- Every push to `main` builds a universal macOS app and publishes the ZIP to Releases, GitHub Packages, and Actions artifacts.
 - Centered column, dimmed markup, bold headings, italic emphasis, monospaced code. Fonts are iA Writer Duo, Quattro, and Mono, bundled, SIL OFL.
 - Typewriter Mode (⌥⌘T) keeps the caret line centered.
 - Authorship (⇧⌘A). Paste as / Mark as live under Authors.
