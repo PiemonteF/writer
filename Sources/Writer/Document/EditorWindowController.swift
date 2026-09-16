@@ -42,7 +42,27 @@ final class EditorWindowController: NSWindowController {
         super.init(window: window)
         shouldCascadeWindows = true
         windowFrameAutosaveName = "EditorWindowFrame"
+        attachCommandsAccessory(to: window)
         editor.onTextChange = { [weak self] in self?.refreshPreview() }
+    }
+
+    private func attachCommandsAccessory(to window: NSWindow) {
+        let button = NSButton(title: "Commands", target: nil, action: #selector(AppDelegate.showCommands(_:)))
+        button.bezelStyle = .inline
+        button.isBordered = false
+        button.font = .systemFont(ofSize: 12, weight: .medium)
+        button.contentTintColor = .secondaryLabelColor
+        button.setButtonType(.momentaryChange)
+        button.setAccessibilityLabel("Commands")
+        button.toolTip = "All commands and what they do  (⌘/)"
+        button.sizeToFit()
+        let wrap = NSView(frame: NSRect(x: 0, y: 0, width: button.frame.width + 20, height: 28))
+        button.frame = NSRect(x: 8, y: 2, width: button.frame.width + 4, height: 24)
+        wrap.addSubview(button)
+        let accessory = NSTitlebarAccessoryViewController()
+        accessory.view = wrap
+        accessory.layoutAttribute = .trailing
+        window.addTitlebarAccessoryViewController(accessory)
     }
 
     required init?(coder: NSCoder) { fatalError("not supported") }

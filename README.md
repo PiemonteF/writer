@@ -78,6 +78,7 @@ Library, ⌥⌘L. A folder of Markdown and text files, with search. File > Choos
 
 ## What it does
 
+- Commands (⌘/): list every command with its shortcut and what it does. Also under View and Help, and as Commands in the title bar.
 - Live Markdown Preview (⌥⌘R): edit formatted Markdown inline, with one-backspace divider deletion, boxed code blocks with thin editable fences, and GitHub-style quotes.
 - Heading Tree (⌥⌘O): a floating, clickable outline of `#`, `##` and `###` headings, with the visible section highlighted, hand cursors, and a smooth hover fade.
 - Both modes are off by default; enable them under **Writer > Settings**.
@@ -95,6 +96,7 @@ Library, ⌥⌘L. A folder of Markdown and text files, with search. File > Choos
 
 | Action | Key |
 | --- | --- |
+| Commands | ⌘/ |
 | Focus Mode | ⌘D |
 | Preview | ⌘R |
 | Live Markdown Preview | ⌥⌘R |

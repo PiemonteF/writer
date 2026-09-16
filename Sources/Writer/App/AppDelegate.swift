@@ -1,6 +1,8 @@
 import AppKit
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    private var commandGuide: CommandGuideController?
+
     func applicationWillFinishLaunching(_ notification: Notification) {
         registerBundledFonts()
         _ = NSDocumentController.shared
@@ -87,6 +89,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @IBAction func toggleLivePreview(_ sender: Any?) { Preferences.shared.livePreview.toggle() }
     @IBAction func toggleOutline(_ sender: Any?) { Preferences.shared.showOutline.toggle() }
+
+    @IBAction func showCommands(_ sender: Any?) {
+        if commandGuide == nil {
+            commandGuide = CommandGuideController()
+        }
+        commandGuide?.showWindow(sender)
+    }
 
     @IBAction func toggleSyntaxHighlight(_ sender: Any?) {
         let prefs = Preferences.shared

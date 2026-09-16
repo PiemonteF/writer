@@ -80,6 +80,8 @@ enum MainMenu {
             item("Mark Selection as Reference", #selector(EditorViewController.markAsReference(_:))),
         ]))
         main.addItem(submenu("View", [
+            item("Commands…", #selector(AppDelegate.showCommands(_:)), "/"),
+            .separator(),
             item("Focus Mode", #selector(AppDelegate.toggleFocusMode(_:)), "d"),
             submenu("Focus", [
                 item("Sentence", #selector(AppDelegate.setFocusMode(_:)), represents: FocusMode.sentence),
@@ -117,7 +119,10 @@ enum MainMenu {
             item("Bring All to Front", #selector(NSApplication.arrangeInFront(_:))),
         ])
         main.addItem(window)
-        NSApp.windowsMenu = window.submenu
+        NSApplication.shared.windowsMenu = window.submenu
+        main.addItem(submenu("Help", [
+            item("Commands…", #selector(AppDelegate.showCommands(_:))),
+        ]))
         return main
     }
 
