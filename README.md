@@ -92,10 +92,14 @@ Select Duo, Quattro or Mono to return to a bundled font.
 ## Automated builds
 
 Every push to `main` tests and builds a universal macOS app (Apple Silicon and
-Intel), then publishes `Writer-macOS.zip` to the repository's **Packages** area
-at `ghcr.io/piemontef/writer`, tagged with the commit SHA and `latest`.
-The ZIP is also downloadable from the workflow's **Artifacts** section.
-Pull requests build and test without publishing packages.
+Intel), then publishes `Writer-macOS.zip` as an asset on a new **Release**.
+Open the repository's **Releases** section and download the ZIP from the latest
+release's **Assets** list. Each release points to the exact commit that built it;
+reruns create a separate release.
+
+The ZIP is also published to **Packages** at `ghcr.io/piemontef/writer`, tagged
+with the commit SHA and `latest`, and to the workflow's **Artifacts** section.
+Pull requests build and test without publishing releases or packages.
 
 GitHub Packages stores the ZIP as an OCI artifact; download with
 [ORAS](https://oras.land/docs/commands/oras_pull/):
