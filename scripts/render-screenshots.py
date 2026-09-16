@@ -102,6 +102,28 @@ def focus_prose() -> str:
 """
 
 
+AI_PALETTE = ["#C46A38", "#6B5CA8", "#C45A7A", "#2E8F78", "#B8860B", "#3A6FA0"]
+
+
+def color_ai(text: str) -> str:
+    parts = []
+    for i, word in enumerate(text.split(" ")):
+        parts.append(f"<span style='color:{AI_PALETTE[i % len(AI_PALETTE)]}'>{word}</span>")
+    return " ".join(parts)
+
+
+def authorship() -> str:
+    pasted = color_ai(
+        "In today's rapidly evolving landscape, leveraging authentic storytelling is absolutely essential for any writer who wants to think outside the box."
+    )
+    return f"""
+<p class="h">{MK.format('# ')}The quiet page</p>
+<p>Write like nobody is watching. The page is a room with the door closed, and the only sound is the sentence you are still deciding.</p>
+<p>{pasted}</p>
+<p>That is enough. Close the file before you start explaining it.</p>
+"""
+
+
 def workshop() -> str:
     strike = lambda s: f"<span class='strike'>{s}</span>"
     return f"""
@@ -348,6 +370,12 @@ add(
     page(LIGHT, editor_shell("the-quiet-page.md", heading() + prose(), "98 words · 1 min"), 760, 720),
     872,
     832,
+)
+add(
+    "authorship-light",
+    page(LIGHT, editor_shell("the-quiet-page.md", authorship(), "You 61% · 72 words · 1 min"), 760, 560),
+    872,
+    672,
 )
 add(
     "editor-dark",

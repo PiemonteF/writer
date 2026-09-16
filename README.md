@@ -4,10 +4,20 @@
 
 # Writer
 
-A personal macOS clone of iA Writer. Native Swift and AppKit, no Xcode project.
+Um local simples e sem AI. Se tiver, você sabe.
+
+Pensamentos autênticos. Os seus.
+
+Native Swift and AppKit. No Xcode project.
 
 <p align="center">
   <img src="docs/screenshots/editor-light.png" width="720" alt="Writer in light mode">
+</p>
+
+Authorship, ⇧⌘A. What you typed stays black. What was pasted or generated is in color. Rewrite it and it becomes yours again.
+
+<p align="center">
+  <img src="docs/screenshots/authorship-light.png" width="720" alt="Authorship: your words in black, pasted AI in color">
 </p>
 
 ## Run it
@@ -60,7 +70,7 @@ Library, ⌥⌘L. A folder of Markdown and text files, with search. File > Choos
 
 - Centered column, dimmed markup, bold headings, italic emphasis, monospaced code. Fonts are iA Writer Duo, Quattro, and Mono, bundled, SIL OFL.
 - Typewriter Mode (⌥⌘T) keeps the caret line centered.
-- Authorship (⇧⌘A) shows what you typed versus what you pasted. Your words stay black and white. AI and pasted text are in color. Rewrite them and they become yours. Paste as / Mark as live under Authors.
+- Authorship (⇧⌘A). Paste as / Mark as live under Authors.
 - Word count and reading time (⇧⌘C toggles the bar).
 - Export to HTML or PDF. Copy HTML with ⌥⌘C.
 - Format: Bold ⌘B, Italic ⌘I, Heading 1 to 3 (⌥⌘1 to ⌥⌘3), Body ⌥⌘0.
