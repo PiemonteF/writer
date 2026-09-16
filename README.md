@@ -4,9 +4,9 @@
 
 # Writer
 
-Um local simples e sem AI. Se tiver, você sabe.
+A simple place with no AI. If there is any, you know.
 
-Pensamentos autênticos. Os seus.
+Authentic thoughts. Yours.
 
 Native Swift and AppKit. No Xcode project.
 
