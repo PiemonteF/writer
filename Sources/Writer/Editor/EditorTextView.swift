@@ -2,6 +2,14 @@ import AppKit
 
 final class EditorTextView: NSTextView {
     private static let headingPrefix = try! NSRegularExpression(pattern: #"^[ \t]{0,3}#{1,6}[ \t]*"#)
+    private static let authorshipType = NSPasteboard.PasteboardType("com.absonson.writer.authorship")
+
+    var inputAttribution: Author = .selfTyped
+    var attributedSlice: Authorship?
+    var attributionLocked = false
+    var suppressAuthorship = false
+    var copySlice: (() -> Authorship)?
+    var styleRangeAt: ((Int) -> NSRange?)?
 
     @IBAction func toggleBold(_ sender: Any?) { toggleWrap("**") }
 
@@ -38,9 +46,61 @@ final class EditorTextView: NSTextView {
         setSelectedRange(NSRange(location: selection.location + width, length: selection.length))
     }
 
+    override func selectionRange(forProposedRange proposedCharRange: NSRange, granularity: NSSelectionGranularity) -> NSRange {
+        if granularity == .selectByWord, let range = styleRangeAt?(proposedCharRange.location) {
+            return range
+        }
+        return super.selectionRange(forProposedRange: proposedCharRange, granularity: granularity)
+    }
+
     private func replace(_ range: NSRange, with replacement: String) {
         guard shouldChangeText(in: range, replacementString: replacement) else { return }
         textStorage?.replaceCharacters(in: range, with: replacement)
         didChangeText()
+    }
+
+    override func readSelection(from pboard: NSPasteboard) -> Bool {
+        if !attributionLocked {
+            let text = pboard.string(forType: .string) ?? ""
+            let utf16 = (text as NSString).length
+            if let slice = decodeAuthorship(pboard.string(forType: Self.authorshipType), utf16Length: utf16) {
+                attributedSlice = slice
+            } else {
+                inputAttribution = .ai
+            }
+        }
+        let result = super.readSelection(from: pboard)
+        inputAttribution = .selfTyped
+        attributedSlice = nil
+        attributionLocked = false
+        return result
+    }
+
+    override func writeSelection(to pboard: NSPasteboard, types: [NSPasteboard.PasteboardType]) -> Bool {
+        let result = super.writeSelection(to: pboard, types: types)
+        if let slice = copySlice?(), slice.length > 0 {
+            pboard.setString(encodeAuthorship(slice), forType: Self.authorshipType)
+        }
+        return result
+    }
+
+    private func encodeAuthorship(_ auth: Authorship) -> String {
+        auth.runs.map { "\($0.author.annotationKey):\($0.length)" }.joined(separator: " ")
+    }
+
+    private func decodeAuthorship(_ payload: String?, utf16Length: Int) -> Authorship? {
+        guard let payload, utf16Length > 0 else { return nil }
+        var runs: [Authorship.Run] = []
+        var total = 0
+        for token in payload.split(separator: " ") {
+            let parts = token.split(separator: ":", maxSplits: 1)
+            guard parts.count == 2,
+                  let author = Author.parse(key: String(parts[0])),
+                  let length = Int(parts[1]), length > 0 else { return nil }
+            runs.append(Authorship.Run(author: author, length: length))
+            total += length
+        }
+        guard total == utf16Length else { return nil }
+        return Authorship(length: total, runs: runs)
     }
 }

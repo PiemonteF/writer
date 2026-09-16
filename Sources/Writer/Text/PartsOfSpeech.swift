@@ -15,7 +15,7 @@ enum PartOfSpeech: String, CaseIterable {
     }
 
     fileprivate static let byTag: [NLTag: PartOfSpeech] = [
-        .noun: .noun, .pronoun: .noun, .verb: .verb, .adjective: .adjective, .adverb: .adverb, .conjunction: .conjunction,
+        .noun: .noun, .verb: .verb, .adjective: .adjective, .adverb: .adverb, .conjunction: .conjunction,
     ]
 }
 

@@ -70,9 +70,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Preferences.shared.showStats.toggle()
     }
 
+    @IBAction func toggleAuthorship(_ sender: Any?) {
+        Preferences.shared.showAuthorship.toggle()
+    }
+
     @IBAction func setEditorFont(_ sender: NSMenuItem) {
         guard let font = sender.representedObject as? EditorFont else { return }
         Preferences.shared.font = font
+    }
+
+    @IBAction func toggleSyntaxHighlight(_ sender: Any?) {
+        let prefs = Preferences.shared
+        prefs.highlightedParts = prefs.highlightedParts.isEmpty ? Set(PartOfSpeech.allCases) : []
     }
 
     @IBAction func togglePartOfSpeech(_ sender: NSMenuItem) {
@@ -83,6 +92,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @IBAction func clearPartsOfSpeech(_ sender: Any?) {
         Preferences.shared.highlightedParts = []
+    }
+
+    @IBAction func toggleStyleCheck(_ sender: Any?) {
+        let prefs = Preferences.shared
+        prefs.styleChecks = prefs.styleChecks.isEmpty ? Set(StyleIssue.allCases) : []
+    }
+
+    @IBAction func toggleStyleIssue(_ sender: NSMenuItem) {
+        guard let kind = sender.representedObject as? StyleIssue else { return }
+        let prefs = Preferences.shared
+        prefs.styleChecks = prefs.styleChecks.symmetricDifference([kind])
+    }
+
+    @IBAction func clearStyleCheck(_ sender: Any?) {
+        Preferences.shared.styleChecks = []
     }
 
     @IBAction func biggerFont(_ sender: Any?) {
@@ -106,7 +130,11 @@ extension AppDelegate: NSMenuItemValidation {
         case #selector(toggleNightMode): item.state = prefs.appearance == .dark ? .on : .off
         case #selector(setAppearance): item.state = item.representedObject as? Appearance == prefs.appearance ? .on : .off
         case #selector(toggleStats): item.state = prefs.showStats ? .on : .off
+        case #selector(toggleAuthorship): item.state = prefs.showAuthorship ? .on : .off
+        case #selector(toggleSyntaxHighlight): item.state = prefs.highlightedParts.isEmpty ? .off : .on
         case #selector(togglePartOfSpeech): item.state = (item.representedObject as? PartOfSpeech).map(prefs.highlightedParts.contains) == true ? .on : .off
+        case #selector(toggleStyleCheck): item.state = prefs.styleChecks.isEmpty ? .off : .on
+        case #selector(toggleStyleIssue): item.state = (item.representedObject as? StyleIssue).map(prefs.styleChecks.contains) == true ? .on : .off
         case #selector(setEditorFont): item.state = item.representedObject as? EditorFont == prefs.font ? .on : .off
         default: break
         }

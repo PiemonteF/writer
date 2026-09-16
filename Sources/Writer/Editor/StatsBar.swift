@@ -21,8 +21,12 @@ final class StatsBar: NSView {
 
     required init?(coder: NSCoder) { fatalError("not supported") }
 
-    func update(_ stats: TextStatistics, theme: Theme) {
-        label.stringValue = stats.summary
+    func update(_ stats: TextStatistics, theme: Theme, youPercent: Int? = nil) {
+        if let youPercent {
+            label.stringValue = "You \(youPercent)% · \(stats.summary)"
+        } else {
+            label.stringValue = stats.summary
+        }
         label.textColor = theme.dimmedText
     }
 }

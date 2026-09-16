@@ -32,7 +32,10 @@ Sources/Writer/
   Text/TextStatistics.swift        words, characters, sentences, reading time (pure)
   Text/FocusRange.swift            sentence/paragraph range around the caret (pure)
   Text/PartsOfSpeech.swift         NLTagger lexical classes -> [PartOfSpeechSpan] (pure)
-Tests/WriterTests/                 pure-function tests: highlighter, renderer, statistics, focus range, parts of speech
+  Text/StyleCheck.swift            fillers, clichés, redundancies -> [StyleSpan] (pure)
+  Text/Authorship.swift            run-length author map, insert/delete/mark (pure)
+  Text/AnnotationBlock.swift       Markdown Annotations trailer parse/render (pure)
+Tests/WriterTests/                 pure-function tests: highlighter, renderer, statistics, focus range, parts of speech, style check, authorship
 Resources/Info.plist
 Resources/Fonts/*.ttf
 scripts/build-app.sh               swift build -c release, assemble .app, ad hoc codesign
@@ -56,8 +59,10 @@ final class Preferences {                      // UserDefaults-backed, posts .pr
     var focusMode: FocusMode        // default .off
     var typewriter: Bool            // default false
     var showStats: Bool             // default true
+    var showAuthorship: Bool        // default false; ⇧⌘A
     var lineLength: Int             // max characters per line, default 66
-    var highlightedParts: Set<PartOfSpeech>  // default empty
+    var highlightedParts: Set<PartOfSpeech>  // default empty; ⇧⌘D toggles all
+    var styleChecks: Set<StyleIssue>         // default empty; ⌥⇧⌘D toggles all
     var libraryURL: URL             // default ~/Documents/Writer
     var showLibrary: Bool           // default false
 }
@@ -90,7 +95,11 @@ Rules are `(NSRegularExpression, styleForWholeMatch, styleForMarkupGroups)` in o
 
 Applying: on `NSTextStorageDelegate.textStorage(_:didProcessEditing:)`, recompute spans for the whole document when it is under 200 KB (measured in UTF-16 units), otherwise for the edited paragraph range only. Reset the affected range to base attributes (theme font, text color, paragraph style with line height), then layer spans. Attribute application is wrapped in `beginEditing`/`endEditing`.
 
-Focus mode and parts-of-speech colors are one overlay of temporary foreground-color attributes on the layout manager, never the text storage, so they never dirty the document. `applyOverlay()` clears the overlay, paints part-of-speech colors (skipping code and URL spans), then paints `dimmedText` outside the focus range so dimming wins.
+Focus mode, parts-of-speech, style check, and authorship are one overlay of temporary attributes on the layout manager, never the text storage, so they never dirty the document. `applyOverlay()` clears the overlay, then either paints authorship (when `showAuthorship` is on) or part-of-speech colors (skipping code and URL spans). Style check then strikes matching fillers, clichés, and redundancies in `dimmedText`. Focus dimming is applied last. Authorship and syntax highlight are alternative views: authorship takes the color overlay when both would apply. Style check can run with either. Double-clicking a struck span selects the whole match.
+
+Syntax colors follow iA Writer: nouns red, verbs blue, adjectives brown, adverbs magenta, conjunctions green. ⇧⌘D enables every part of speech; the Syntax Highlight submenu still toggles them one at a time.
+
+Style check is a table of English phrases, longest match first, word-boundary, case-insensitive. Categories: filler (`actually`, `pretty much`), redundancy (`end result`, `unexpected surprise`), cliché (`think outside the box`). ⌥⇧⌘D enables every category. Strikes are editor-only: preview and export are untouched.
 
 ```swift
 enum FocusRange {
@@ -124,18 +133,21 @@ The stats bar shows `1,234 words · 6 min` in the dimmed color, 11pt, right alig
 - File: New ⌘N, Open ⌘O, Open Recent, Close ⌘W, Save ⌘S, Duplicate, Rename, Move To, Revert.
 - Edit: Undo, Redo, Cut, Copy, Paste, Select All, Find (⌘F, `performFindPanelAction:`), Spelling.
 - Format: Bold ⌘B wraps selection in `**`, Italic ⌘I wraps in `_`, Heading 1 to 3 (⌥⌘1..3) prefix line with `#`.
-- View: Focus Mode ⌘D toggles sentence focus, Focus submenu (Sentence, Paragraph), Typewriter Mode ⌥⌘T, Night Mode ⌥⌘N cycles appearance, Word Count ⇧⌘C toggles stats, Font submenu (Duo, Quattro, Mono), Bigger ⌘+, Smaller ⌘-.
+- View: Focus Mode ⌘D toggles sentence focus, Focus submenu (Sentence, Paragraph), Typewriter Mode ⌥⌘T, Night Mode ⌥⌘N cycles appearance, Syntax Highlight ⇧⌘D (submenu per part of speech), Style Check ⌥⇧⌘D (submenu: Fillers, Redundancies, Clichés), Authorship ⇧⌘A, Word Count ⇧⌘C toggles stats, Font submenu (Duo, Quattro, Mono), Bigger ⌘+, Smaller ⌘-.
+- Authors: Show Authorship ⇧⌘A, Paste as AI / Mine / Reference, Mark Selection as AI / Mine / Reference.
 - Window: Minimize, Zoom, Bring All to Front.
 
 ## Document
 
-`Document: NSDocument` holds `text: String`, reads and writes UTF-8, `autosavesInPlace` true, `canAsynchronouslyWrite` false. `Info.plist` declares `net.daringfireball.markdown` and `public.plain-text` with `NSDocumentClass = Writer.Document` and `CFBundleTypeRole = Editor`. On launch with no documents, `applicationShouldOpenUntitledFile` returns true.
+`Document: NSDocument` holds `text: String` and `authorship: Authorship`, reads and writes UTF-8, `autosavesInPlace` true, `canAsynchronouslyWrite` false. On write, if authorship is not all self-typed, an annotation trailer is appended (Markdown Annotations): a `---` block at EOF with `Annotations: 0,<graphemes> SHA-256 <hex>`, `@Self` / `&AI` / `*Reference` / `@Name` grapheme ranges, closed by `...`. The editor hides the trailer; preview and export use the body only. A hash mismatch (file edited elsewhere) drops authorship and treats the body as self-typed. `Info.plist` declares `net.daringfireball.markdown` and `public.plain-text` with `NSDocumentClass = Writer.Document` and `CFBundleTypeRole = Editor`. On launch with no documents, `applicationShouldOpenUntitledFile` returns true.
 
-Window: 760 by 900 default, title bar shows document name, `titlebarAppearsTransparent`, full-size content view, background is the theme background, no toolbar.
+Authorship is a run-length map over UTF-16 units. Typing is `.selfTyped`. Paste (and drop) is `.ai` unless the clipboard carries Writer authorship, in which case those runs are preserved. `Paste as Mine` / `Paste as Reference` override the default. Marking a selection rewrites its runs. Typed characters that replace AI text become self-typed, so rewriting borrowed text makes it your own. When authorship is shown, self-typed text uses `theme.text`, AI words cycle a palette, other humans use muted tones, and reference text uses `dimmedText`. The stats bar prepends `You N%` (non-whitespace characters).
+
+Window: 760 by 720 default, capped to the screen's visible area, frame autosaved as `EditorWindowFrame`; title bar shows document name, `titlebarAppearsTransparent`, full-size content view, background is the theme background, no toolbar.
 
 ## Verification
 
-`make test` runs the pure-function tests. `make run` builds `build/Writer.app` and opens it. A screenshot of the running window is the acceptance artifact for anything visual: `scripts/screenshot.sh` finds the Writer window via `CGWindowListCopyWindowInfo` (a short Swift script) and calls `screencapture -l <id>`.
+`make test` runs the pure-function tests. `make run` builds `build/Writer.app` and opens it. `make install` copies the bundle to `/Applications`. A screenshot of the running window is the acceptance artifact for anything visual: `scripts/screenshot.sh` finds the Writer window via `CGWindowListCopyWindowInfo` (a short Swift script) and calls `screencapture -l <id>`.
 
 ## Window
 
@@ -143,4 +155,4 @@ Window: 760 by 900 default, title bar shows document name, `titlebarAppearsTrans
 
 ## Later phases
 
-Style check (fill words, clichés, redundancies), content blocks, a preferences window, an app icon.
+Content blocks, a preferences window, an app icon.

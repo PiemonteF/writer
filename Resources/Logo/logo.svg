@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="100%" height="100%" fill="#FFFFFF"/>
+  <g transform="translate(256.00,661.91) scale(0.429530,-0.429530)" fill="#1A1A1A"><path d="M-8 698H143L209 363L246 169H249L293 363L370 698H536L614 363L657 169H660L697 363L764 698H908L746 0H573L485 378L451 531H448L413 378L325 0H151Z"/></g>
+  <rect x="666.63" y="350.07" width="101.37" height="27.49" fill="#2F7CF6"/><rect x="701.85" y="350.07" width="30.93" height="323.87" fill="#2F7CF6"/><rect x="666.63" y="646.44" width="101.37" height="27.49" fill="#2F7CF6"/>
+</svg>

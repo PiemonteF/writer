@@ -12,5 +12,6 @@ cp "$BIN" "$APP/Contents/MacOS/Writer"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 cp -R Resources/Fonts "$APP/Contents/Resources/Fonts"
 cp Resources/preview.css "$APP/Contents/Resources/preview.css"
+cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 codesign --force --sign - "$APP" >/dev/null 2>&1
 echo "$APP"

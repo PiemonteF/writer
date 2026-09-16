@@ -69,9 +69,19 @@ final class Preferences {
         set { store(newValue, "showStats") }
     }
 
+    var showAuthorship: Bool {
+        get { defaults.bool(forKey: "showAuthorship") }
+        set { store(newValue, "showAuthorship") }
+    }
+
     var highlightedParts: Set<PartOfSpeech> {
         get { Set((defaults.stringArray(forKey: "highlightedParts") ?? []).compactMap(PartOfSpeech.init(rawValue:))) }
         set { store(newValue.map(\.rawValue).sorted(), "highlightedParts") }
+    }
+
+    var styleChecks: Set<StyleIssue> {
+        get { Set((defaults.stringArray(forKey: "styleChecks") ?? []).compactMap(StyleIssue.init(rawValue:))) }
+        set { store(newValue.map(\.rawValue).sorted(), "styleChecks") }
     }
 
     var libraryURL: URL {

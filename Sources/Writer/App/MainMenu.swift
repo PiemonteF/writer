@@ -63,6 +63,17 @@ enum MainMenu {
             item("Heading 2", #selector(EditorTextView.setHeading(_:)), "2", [.command, .option], tag: 2),
             item("Heading 3", #selector(EditorTextView.setHeading(_:)), "3", [.command, .option], tag: 3),
         ]))
+        main.addItem(submenu("Authors", [
+            item("Show Authorship", #selector(AppDelegate.toggleAuthorship(_:)), "a", [.command, .shift]),
+            .separator(),
+            item("Paste as AI", #selector(EditorViewController.pasteAsAI(_:))),
+            item("Paste as Mine", #selector(EditorViewController.pasteAsMine(_:))),
+            item("Paste as Reference", #selector(EditorViewController.pasteAsReference(_:))),
+            .separator(),
+            item("Mark Selection as AI", #selector(EditorViewController.markAsAI(_:))),
+            item("Mark Selection as Mine", #selector(EditorViewController.markAsMine(_:))),
+            item("Mark Selection as Reference", #selector(EditorViewController.markAsReference(_:))),
+        ]))
         main.addItem(submenu("View", [
             item("Focus Mode", #selector(AppDelegate.toggleFocusMode(_:)), "d"),
             submenu("Focus", [
@@ -85,10 +96,10 @@ enum MainMenu {
             item("Bigger", #selector(AppDelegate.biggerFont(_:)), "+"),
             item("Smaller", #selector(AppDelegate.smallerFont(_:)), "-"),
             .separator(),
+            syntaxHighlight(),
+            styleCheck(),
+            item("Authorship", #selector(AppDelegate.toggleAuthorship(_:)), "a", [.command, .shift]),
             item("Word Count", #selector(AppDelegate.toggleStats(_:)), "c", [.command, .shift]),
-            submenu("Syntax Highlight", PartOfSpeech.allCases.map {
-                item($0.title, #selector(AppDelegate.togglePartOfSpeech(_:)), represents: $0)
-            } + [.separator(), item("Clear", #selector(AppDelegate.clearPartsOfSpeech(_:)))]),
             .separator(),
             item("Enter Full Screen", #selector(NSWindow.toggleFullScreen(_:)), "f", [.command, .control]),
         ]))
@@ -120,6 +131,26 @@ enum MainMenu {
         items.forEach(menu.addItem)
         item.submenu = menu
         return item
+    }
+
+    private static func syntaxHighlight() -> NSMenuItem {
+        let menuItem = submenu("Syntax Highlight", PartOfSpeech.allCases.map {
+            item($0.title, #selector(AppDelegate.togglePartOfSpeech(_:)), represents: $0)
+        } + [.separator(), item("Clear", #selector(AppDelegate.clearPartsOfSpeech(_:)))])
+        menuItem.action = #selector(AppDelegate.toggleSyntaxHighlight(_:))
+        menuItem.keyEquivalent = "d"
+        menuItem.keyEquivalentModifierMask = [.command, .shift]
+        return menuItem
+    }
+
+    private static func styleCheck() -> NSMenuItem {
+        let menuItem = submenu("Style Check", StyleIssue.allCases.map {
+            item($0.title, #selector(AppDelegate.toggleStyleIssue(_:)), represents: $0)
+        } + [.separator(), item("Clear", #selector(AppDelegate.clearStyleCheck(_:)))])
+        menuItem.action = #selector(AppDelegate.toggleStyleCheck(_:))
+        menuItem.keyEquivalent = "d"
+        menuItem.keyEquivalentModifierMask = [.command, .shift, .option]
+        return menuItem
     }
 
     // NSDocumentController populates the submenu that contains a clearRecentDocuments: item.

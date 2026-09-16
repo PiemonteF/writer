@@ -11,7 +11,7 @@ final class EditorWindowController: NSWindowController {
     private var exporter: PreviewViewController?
 
     init(document: Document) {
-        editor = EditorViewController(text: document.text)
+        editor = EditorViewController(text: document.text, authorship: document.authorship)
         previewItem = NSSplitViewItem(viewController: preview)
         previewItem.minimumThickness = 320
         previewItem.canCollapse = true
@@ -27,19 +27,21 @@ final class EditorWindowController: NSWindowController {
         split.addSplitViewItem(previewItem)
         split.splitView.dividerStyle = .thin
 
+        let visible = NSScreen.main?.visibleFrame.size ?? NSSize(width: 1440, height: 900)
+        let size = NSSize(width: min(760, visible.width - 40), height: min(720, visible.height - 60))
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 820, height: 900),
+            contentRect: NSRect(origin: .zero, size: size),
             styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered,
             defer: false)
         window.titlebarAppearsTransparent = true
         window.contentViewController = split
-        window.setContentSize(NSSize(width: 820, height: 900))
+        window.setContentSize(size)
         window.minSize = NSSize(width: 400, height: 300)
         window.center()
         super.init(window: window)
         shouldCascadeWindows = true
-        windowFrameAutosaveName = "EditorWindow"
+        windowFrameAutosaveName = "EditorWindowFrame"
         editor.onTextChange = { [weak self] in self?.refreshPreview() }
     }
 
@@ -58,7 +60,7 @@ final class EditorWindowController: NSWindowController {
         let showing = previewItem.isCollapsed
         if showing {
             let width = max(window?.frame.width ?? 0, 1240)
-            window?.setContentSize(NSSize(width: width, height: window?.frame.height ?? 900))
+            window?.setContentSize(NSSize(width: width, height: window?.contentView?.frame.height ?? 720))
             refreshPreview(immediately: true)
         }
         previewItem.animator().isCollapsed = !showing

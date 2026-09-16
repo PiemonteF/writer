@@ -1,4 +1,4 @@
-.PHONY: app run test clean
+.PHONY: app run install test clean
 
 export DEVELOPER_DIR ?= /Applications/Xcode.app/Contents/Developer
 
@@ -7,6 +7,11 @@ app:
 
 run: app
 	open build/Writer.app
+
+install: app
+	rm -rf /Applications/Writer.app
+	cp -R build/Writer.app /Applications/Writer.app
+	open /Applications/Writer.app
 
 test:
 	swift test
