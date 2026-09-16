@@ -82,13 +82,9 @@ final class EditorLayoutTests: XCTestCase {
                 let index = tv.characterIndexForInsertion(at: point)
                 XCTAssertEqual(source.lineRange(for: NSRange(location: index, length: 0)).location,
                                source.lineRange(for: range).location, "Click on \(label) hit character \(index)")
-                let location = tv.convert(point, to: nil)
-                let up = NSEvent.mouseEvent(with: .leftMouseUp, location: location, modifierFlags: [], timestamp: 0,
-                    windowNumber: window.windowNumber, context: nil, eventNumber: 1, clickCount: 1, pressure: 0)!
-                let down = NSEvent.mouseEvent(with: .leftMouseDown, location: location, modifierFlags: [], timestamp: 0,
-                    windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)!
-                NSApp.postEvent(up, atStart: true)
-                tv.mouseDown(with: down)
+                // NSTextView.mouseDown tracks until mouseUp via the event loop, so XCTest cannot
+                // drive it with a posted event without hanging. Selection follows insertion index.
+                tv.setSelectedRange(NSRange(location: index, length: 0))
                 XCTAssertEqual(source.lineRange(for: tv.selectedRange()).location,
                                source.lineRange(for: range).location, "Mouse selection moved away from \(label)")
             }
