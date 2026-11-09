@@ -47,8 +47,7 @@ function writerHighlight(dark: boolean) {
       { tag: tags.meta, color: colors.markup },
       { tag: tags.link, color: colors.accent },
       { tag: tags.url, color: colors.accent },
-      { tag: tags.quote, color: colors.markup, fontStyle: "italic" },
-      { tag: tags.list, color: colors.markup },
+      { tag: tags.quote, fontStyle: "italic" },
       { tag: tags.contentSeparator, color: colors.markup },
     ]),
   );

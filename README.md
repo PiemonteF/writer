@@ -94,12 +94,14 @@ AppImage: `chmod +x *.AppImage && ./Writer_*.AppImage`. Deb/rpm include a `.desk
 make linux-run
 ```
 
+Chrome-less like iA Writer: white page, no toolbar — **Ctrl+/** opens Commands. Library stays hidden until Alt+Ctrl+L.
+
 Details: [`linux/README.md`](linux/README.md).
 
 ### What works on Linux
 
-- Markdown editor with iA Writer Duo / Quattro / Mono fonts
-- Library sidebar with search
+- Quiet white writing surface (iA Writer Duo / Quattro / Mono); night mode optional
+- Library sidebar on demand (Alt+Ctrl+L)
 - Preview (Ctrl+R)
 - Focus Mode (Ctrl+D) — sentence / paragraph
 - Style Check (Alt+Shift+Ctrl+D)
@@ -124,7 +126,7 @@ Authorship, ⇧⌘A. What you typed stays black. What was pasted or generated is
 
 ## Shortcuts (Linux)
 
-Press **Ctrl+/** or **Ctrl+?** (or the Commands toolbar button) for the full searchable guide — every action, key, and a short description. Filter with the search box; ↑↓ + Enter runs a command.
+Press **Ctrl+/** or **Ctrl+?** for the full searchable guide — every action, key, and a short description. Filter with the search box; ↑↓ + Enter runs a command.
 
 | Action | Key |
 | --- | --- |

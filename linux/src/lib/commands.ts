@@ -12,6 +12,7 @@ export type CommandAction =
   | "library"
   | "style"
   | "stats"
+  | "font"
   | "bigger"
   | "smaller";
 
@@ -171,6 +172,13 @@ export const COMMANDS: CommandItem[] = [
     summary: "Toggle word count and reading time in the status bar.",
     action: "stats",
     chord: { key: "c", shift: true },
+  },
+  {
+    group: "View",
+    title: "Cycle Font",
+    shortcut: "",
+    summary: "Switch between iA Writer Duo, Quattro, and Mono.",
+    action: "font",
   },
   {
     group: "View",

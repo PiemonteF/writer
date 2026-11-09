@@ -5,10 +5,10 @@ import { mountCommandGuide } from "./lib/command-guide";
 import { findActionForEvent, type CommandAction } from "./lib/commands";
 import { createEditor } from "./lib/editor";
 import {
+  FONT_CYCLE,
   loadPreferences,
   savePreferences,
   resolveDark,
-  type EditorFont,
   type Preferences,
 } from "./lib/preferences";
 import { computeStats, statsSummary } from "./lib/stats";
@@ -23,6 +23,19 @@ type LibraryEntry = {
 
 const UNTITLED = "# Untitled\n\n";
 
+const DEMO = `# The quiet page
+
+A simple place with no AI. If there is any, you know.
+
+Authentic thoughts. *Yours.*
+
+> Write until the room goes still.
+
+- Keep the chrome quiet
+- Let the page stay white
+- Trust the keys
+`;
+
 let prefs: Preferences;
 let currentPath: string | null = null;
 let dirty = false;
@@ -34,7 +47,6 @@ const libraryList = document.querySelector<HTMLUListElement>("#library-list")!;
 const librarySearch = document.querySelector<HTMLInputElement>("#library-search")!;
 const statsEl = document.querySelector<HTMLElement>("#stats")!;
 const docTitle = document.querySelector<HTMLElement>("#doc-title")!;
-const fontSelect = document.querySelector<HTMLSelectElement>("#font-select")!;
 const commandsDialog = document.querySelector<HTMLDialogElement>("#commands")!;
 const previewFrame = document.querySelector<HTMLIFrameElement>("#preview")!;
 
@@ -53,30 +65,15 @@ function chromeFromPrefs() {
 function applyShellTheme() {
   const dark = resolveDark(prefs.appearance);
   document.documentElement.dataset.theme = dark ? "dark" : "light";
-  workspace.classList.toggle("library-hidden", !prefs.showLibrary);
+  workspace.classList.toggle("library-open", prefs.showLibrary);
   workspace.classList.toggle("preview-on", prefs.showPreview);
   libraryEl.classList.toggle("hidden", !prefs.showLibrary);
   statsEl.classList.toggle("hidden", !prefs.showStats);
-  fontSelect.value = prefs.font;
-
-  for (const btn of Array.from(document.querySelectorAll<HTMLButtonElement>(".toolbar [data-action]"))) {
-    const action = btn.dataset.action;
-    btn.classList.toggle(
-      "active",
-      (action === "library" && prefs.showLibrary) ||
-        (action === "preview" && prefs.showPreview) ||
-        (action === "focus" && prefs.focusMode !== "off") ||
-        (action === "typewriter" && prefs.typewriter) ||
-        (action === "night" && dark) ||
-        (action === "style" && prefs.styleChecks.length > 0),
-    );
-  }
 }
 
 function setTitle() {
   const base = currentPath ? currentPath.split(/[\\/]/).pop()! : "Untitled";
-  docTitle.textContent = base;
-  docTitle.classList.toggle("dirty", dirty);
+  docTitle.textContent = dirty ? `${base} ·` : base;
   document.title = dirty ? `${base} — Writer` : `${base} · Writer`;
 }
 
@@ -258,6 +255,12 @@ function runCommand(action: CommandAction) {
       prefs.showStats = !prefs.showStats;
       persist();
       break;
+    case "font": {
+      const i = FONT_CYCLE.indexOf(prefs.font);
+      prefs.font = FONT_CYCLE[(i + 1) % FONT_CYCLE.length]!;
+      persist();
+      break;
+    }
     case "bigger":
       prefs.fontSize = Math.min(40, prefs.fontSize + 1);
       persist();
@@ -307,21 +310,20 @@ async function bootstrap() {
   if (!prefs.libraryPath) prefs.libraryPath = libraryPath;
   applyShellTheme();
   editor.reconfigure(chromeFromPrefs());
+  if (new URLSearchParams(location.search).has("demo")) {
+    editor.setText(DEMO);
+    dirty = false;
+  }
   scheduleStats(editor.getText());
   await refreshLibrary();
   setTitle();
   editor.focus();
 }
 
-document.querySelector(".toolbar")!.addEventListener("click", (event) => {
+document.querySelector(".sr-toolbar")!.addEventListener("click", (event) => {
   const target = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-action]");
   if (!target?.dataset.action) return;
   runCommand(target.dataset.action as CommandAction);
-});
-
-fontSelect.addEventListener("change", () => {
-  prefs.font = fontSelect.value as EditorFont;
-  persist();
 });
 
 librarySearch.addEventListener("input", () => {

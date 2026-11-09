@@ -10,32 +10,24 @@
   </head>
   <body>
     <div id="app">
-      <header class="toolbar" role="toolbar" aria-label="Writer">
-        <div class="brand">
-          <img src="/logo.png" alt="" />
-          <span>Writer</span>
-        </div>
-        <button type="button" data-action="new" title="New (Ctrl+N)">New</button>
-        <button type="button" data-action="open" title="Open (Ctrl+O)">Open</button>
-        <button type="button" data-action="save" title="Save (Ctrl+S)">Save</button>
-        <button type="button" data-action="library" title="Library (Alt+Ctrl+L)">Library</button>
-        <button type="button" data-action="preview" title="Preview (Ctrl+R)">Preview</button>
-        <button type="button" data-action="focus" title="Focus Mode (Ctrl+D)">Focus</button>
-        <button type="button" data-action="typewriter" title="Typewriter (Alt+Ctrl+T)">Typewriter</button>
-        <button type="button" data-action="night" title="Night Mode (Alt+Ctrl+N)">Night</button>
-        <button type="button" data-action="style" title="Style Check (Alt+Shift+Ctrl+D)">Style</button>
-        <select id="font-select" title="Font" aria-label="Font">
-          <option value="duo">Duo</option>
-          <option value="quattro">Quattro</option>
-          <option value="mono">Mono</option>
-        </select>
-        <button type="button" data-action="commands" title="Commands (Ctrl+/ or Ctrl+?)">Commands</button>
-        <div class="spacer"></div>
-        <div class="title" id="doc-title">Untitled</div>
-      </header>
+      <!-- Visually hidden: actions stay available to assistive tech; UI is keyboard + Commands. -->
+      <div class="sr-toolbar" role="toolbar" aria-label="Writer">
+        <button type="button" data-action="new">New</button>
+        <button type="button" data-action="open">Open</button>
+        <button type="button" data-action="save">Save</button>
+        <button type="button" data-action="library">Library</button>
+        <button type="button" data-action="preview">Preview</button>
+        <button type="button" data-action="focus">Focus</button>
+        <button type="button" data-action="typewriter">Typewriter</button>
+        <button type="button" data-action="night">Night</button>
+        <button type="button" data-action="style">Style</button>
+        <button type="button" data-action="font">Font</button>
+        <button type="button" data-action="commands">Commands</button>
+        <span id="doc-title" class="sr-only" aria-live="polite">Untitled</span>
+      </div>
 
       <div class="workspace" id="workspace">
-        <aside class="library" id="library">
+        <aside class="library hidden" id="library" aria-label="Library">
           <input
             class="library-search"
             id="library-search"

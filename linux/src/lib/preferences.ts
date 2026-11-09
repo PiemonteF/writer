@@ -18,13 +18,15 @@ export type Preferences = {
   styleChecks: StyleIssue[];
 };
 
-const KEY = "writer.preferences.v1";
+const KEY = "writer.preferences.v2";
 
 export const FONT_FAMILIES: Record<EditorFont, string> = {
   duo: '"iA Writer Duo S", "iA Duo", ui-sans-serif, system-ui, sans-serif',
   quattro: '"iA Writer Quattro S", "iA Quattro", ui-sans-serif, system-ui, sans-serif',
   mono: '"iA Writer Mono S", "iA Mono", ui-monospace, monospace',
 };
+
+export const FONT_CYCLE: EditorFont[] = ["duo", "quattro", "mono"];
 
 export const THEME = {
   light: {
@@ -33,8 +35,8 @@ export const THEME = {
     dimmed: "#BFBFBF",
     markup: "#8E9AA8",
     accent: "#2F7CF6",
-    panel: "#F5F5F5",
-    border: "#E4E4E4",
+    panel: "#FCFCFC",
+    border: "#ECECEC",
     codeBg: "#F2F2F2",
   },
   dark: {
@@ -43,8 +45,8 @@ export const THEME = {
     dimmed: "#575757",
     markup: "#6C7885",
     accent: "#4A90FF",
-    panel: "#181818",
-    border: "#333333",
+    panel: "#1E1E1E",
+    border: "#2A2A2A",
     codeBg: "#2A2A2A",
   },
 } as const;
@@ -53,12 +55,12 @@ export function defaultPreferences(libraryPath = ""): Preferences {
   return {
     font: "duo",
     fontSize: 17,
-    appearance: "system",
+    appearance: "light",
     focusMode: "off",
     typewriter: false,
     showStats: true,
     lineLength: 66,
-    showLibrary: true,
+    showLibrary: false,
     showPreview: false,
     libraryPath,
     styleChecks: [],
