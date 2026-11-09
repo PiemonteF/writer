@@ -2,6 +2,8 @@
 
 Native-feeling Markdown writing app for Omarchy / Arch Linux, built with **Tauri 2 + TypeScript + CodeMirror 6**.
 
+Chrome-less by design (iA Writer–like): white page, no toolbar — open **Commands** with Ctrl+/. Library and preview stay off until you ask.
+
 This is the primary Writer target going forward. The macOS Swift/AppKit app remains under `Sources/` for reference.
 
 ## Dependencies (Omarchy / Arch)

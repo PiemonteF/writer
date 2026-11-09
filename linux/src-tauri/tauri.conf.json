@@ -14,10 +14,12 @@
     "windows": [
       {
         "title": "Writer",
-        "width": 960,
+        "width": 760,
         "height": 720,
-        "minWidth": 640,
-        "minHeight": 480
+        "minWidth": 520,
+        "minHeight": 400,
+        "decorations": true,
+        "backgroundColor": "#FCFCFC"
       }
     ],
     "security": {
