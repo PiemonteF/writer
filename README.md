@@ -105,7 +105,7 @@ Details: [`linux/README.md`](linux/README.md).
 - Style Check (Alt+Shift+Ctrl+D)
 - Night Mode (Alt+Ctrl+N), Typewriter (Alt+Ctrl+T)
 - Word count and reading time (Shift+Ctrl+C)
-- Commands palette (Ctrl+/)
+- In-app commands / shortcuts guide (Ctrl+/ or Ctrl+?)
 
 Still Mac-only for now: authorship coloring, parts-of-speech highlight, live Markdown preview, heading tree, PDF export.
 
@@ -124,9 +124,12 @@ Authorship, ⇧⌘A. What you typed stays black. What was pasted or generated is
 
 ## Shortcuts (Linux)
 
+Press **Ctrl+/** or **Ctrl+?** (or the Commands toolbar button) for the full searchable guide — every action, key, and a short description. Filter with the search box; ↑↓ + Enter runs a command.
+
 | Action | Key |
 | --- | --- |
-| Commands | Ctrl+/ |
+| Commands / shortcuts guide | Ctrl+/ or Ctrl+? |
+| New / Open / Save | Ctrl+N / Ctrl+O / Ctrl+S |
 | Focus Mode | Ctrl+D |
 | Preview | Ctrl+R |
 | Night Mode | Alt+Ctrl+N |
@@ -134,6 +137,9 @@ Authorship, ⇧⌘A. What you typed stays black. What was pasted or generated is
 | Library | Alt+Ctrl+L |
 | Style Check | Alt+Shift+Ctrl+D |
 | Word Count | Shift+Ctrl+C |
+| Bigger / Smaller text | Ctrl+= / Ctrl+- |
+
+Writer uses **Ctrl / Alt+Ctrl** only (no Super), so it stays clear of Omarchy/Hyprland compositor binds (Super+Space, Super+Ctrl+…, etc.).
 
 ## Layout
 

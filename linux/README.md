@@ -84,5 +84,6 @@ Release binary and bundles land under:
 - Night mode, typewriter scrolling, word count / reading time
 - Open / save `.md`, `.markdown`, `.txt`
 - Desktop launcher integration (icon + `.desktop`)
+- In-app commands / shortcuts guide (Ctrl+/ or Ctrl+?) — searchable, grouped, with summaries
 
 Not yet ported from macOS: authorship coloring, parts-of-speech highlight, live Markdown (inline WYSIWYG), heading tree, PDF export.

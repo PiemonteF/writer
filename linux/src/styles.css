@@ -321,46 +321,122 @@ body {
   background: var(--panel);
   color: var(--text);
   padding: 0;
-  width: min(520px, 92vw);
-  max-height: min(70vh, 560px);
+  width: min(560px, 94vw);
+  max-height: min(78vh, 640px);
   box-shadow: 0 18px 50px rgb(0 0 0 / 25%);
+  overflow: hidden;
+}
+
+.commands-dialog[open] {
+  display: flex;
+  flex-direction: column;
 }
 
 .commands-dialog::backdrop {
   background: rgb(0 0 0 / 35%);
 }
 
+.commands-header {
+  padding: 16px 18px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
 .commands-dialog h2 {
   margin: 0;
-  padding: 16px 18px 8px;
   font-size: 15px;
 }
 
-.commands-dialog ul {
-  list-style: none;
-  margin: 0;
-  padding: 0 8px 12px;
-  overflow: auto;
-  max-height: 50vh;
+.commands-hint {
+  margin: 4px 0 10px;
+  font-size: 11px;
+  color: var(--muted);
 }
 
-.commands-dialog li {
+.commands-search {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.commands-search:focus {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+
+.commands-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.commands-group {
+  padding: 10px 10px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.commands-item {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 12px;
-  padding: 10px 10px;
+  align-items: start;
+  padding: 10px;
   border-radius: 8px;
+  font-size: 13px;
+  cursor: default;
+}
+
+.commands-item[data-action]:not([data-action=""]) {
+  cursor: pointer;
+}
+
+.commands-item:hover,
+.commands-item.selected {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.commands-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.commands-item-title {
   font-size: 13px;
 }
 
-.commands-dialog li:hover {
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
+.commands-item-summary {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.35;
 }
 
 .commands-dialog kbd {
   font-family: "iA Writer Mono S", ui-monospace, monospace;
   font-size: 12px;
   color: var(--muted);
+  white-space: nowrap;
+  padding-top: 1px;
+}
+
+.commands-empty {
+  margin: 0;
+  padding: 24px 18px 28px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .dirty::after {

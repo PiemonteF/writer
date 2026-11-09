@@ -29,7 +29,7 @@
           <option value="quattro">Quattro</option>
           <option value="mono">Mono</option>
         </select>
-        <button type="button" data-action="commands" title="Commands (Ctrl+/)">Commands</button>
+        <button type="button" data-action="commands" title="Commands (Ctrl+/ or Ctrl+?)">Commands</button>
         <div class="spacer"></div>
         <div class="title" id="doc-title">Untitled</div>
       </header>
@@ -56,23 +56,21 @@
       <footer class="stats" id="stats">0 words · 0 min</footer>
     </div>
 
-    <dialog class="commands-dialog" id="commands">
-      <h2>Commands</h2>
-      <ul>
-        <li><span>Commands</span><kbd>Ctrl+/</kbd></li>
-        <li><span>New</span><kbd>Ctrl+N</kbd></li>
-        <li><span>Open</span><kbd>Ctrl+O</kbd></li>
-        <li><span>Save</span><kbd>Ctrl+S</kbd></li>
-        <li><span>Focus Mode</span><kbd>Ctrl+D</kbd></li>
-        <li><span>Preview</span><kbd>Ctrl+R</kbd></li>
-        <li><span>Night Mode</span><kbd>Alt+Ctrl+N</kbd></li>
-        <li><span>Typewriter Mode</span><kbd>Alt+Ctrl+T</kbd></li>
-        <li><span>Library</span><kbd>Alt+Ctrl+L</kbd></li>
-        <li><span>Style Check</span><kbd>Alt+Shift+Ctrl+D</kbd></li>
-        <li><span>Word Count</span><kbd>Shift+Ctrl+C</kbd></li>
-        <li><span>Bigger text</span><kbd>Ctrl+=</kbd></li>
-        <li><span>Smaller text</span><kbd>Ctrl+-</kbd></li>
-      </ul>
+    <dialog class="commands-dialog" id="commands" aria-labelledby="commands-title">
+      <div class="commands-header">
+        <h2 id="commands-title">Commands</h2>
+        <p class="commands-hint">Filter, ↑↓ to move, Enter to run, Esc to close · Ctrl+/</p>
+        <input
+          id="commands-search"
+          class="commands-search"
+          type="search"
+          placeholder="Filter commands"
+          aria-label="Filter commands"
+          autocomplete="off"
+        />
+      </div>
+      <ul id="commands-list" class="commands-list" role="listbox" aria-label="Commands"></ul>
+      <p id="commands-empty" class="commands-empty" hidden>No matching commands</p>
     </dialog>
   </body>
 </html>

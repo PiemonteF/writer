@@ -1,6 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { marked } from "marked";
+import { mountCommandGuide } from "./lib/command-guide";
+import { findActionForEvent, type CommandAction } from "./lib/commands";
 import { createEditor } from "./lib/editor";
 import {
   loadPreferences,
@@ -217,6 +219,58 @@ function cycleNight() {
   persist();
 }
 
+function runCommand(action: CommandAction) {
+  switch (action) {
+    case "commands":
+      guide.toggle();
+      break;
+    case "new":
+      newDocument();
+      break;
+    case "open":
+      void openDialog();
+      break;
+    case "save":
+      void saveDocument();
+      break;
+    case "focus":
+      toggleFocus();
+      break;
+    case "preview":
+      prefs.showPreview = !prefs.showPreview;
+      persist();
+      break;
+    case "night":
+      cycleNight();
+      break;
+    case "typewriter":
+      prefs.typewriter = !prefs.typewriter;
+      persist();
+      break;
+    case "library":
+      prefs.showLibrary = !prefs.showLibrary;
+      persist();
+      break;
+    case "style":
+      toggleStyle();
+      break;
+    case "stats":
+      prefs.showStats = !prefs.showStats;
+      persist();
+      break;
+    case "bigger":
+      prefs.fontSize = Math.min(40, prefs.fontSize + 1);
+      persist();
+      break;
+    case "smaller":
+      prefs.fontSize = Math.max(12, prefs.fontSize - 1);
+      persist();
+      break;
+  }
+}
+
+const guide = mountCommandGuide(commandsDialog, { run: runCommand });
+
 const editor = createEditor(
   document.querySelector("#editor")!,
   UNTITLED,
@@ -261,42 +315,8 @@ async function bootstrap() {
 
 document.querySelector(".toolbar")!.addEventListener("click", (event) => {
   const target = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-action]");
-  if (!target) return;
-  switch (target.dataset.action) {
-    case "new":
-      newDocument();
-      break;
-    case "open":
-      void openDialog();
-      break;
-    case "save":
-      void saveDocument();
-      break;
-    case "library":
-      prefs.showLibrary = !prefs.showLibrary;
-      persist();
-      break;
-    case "preview":
-      prefs.showPreview = !prefs.showPreview;
-      persist();
-      break;
-    case "focus":
-      toggleFocus();
-      break;
-    case "typewriter":
-      prefs.typewriter = !prefs.typewriter;
-      persist();
-      break;
-    case "night":
-      cycleNight();
-      break;
-    case "style":
-      toggleStyle();
-      break;
-    case "commands":
-      commandsDialog.showModal();
-      break;
-  }
+  if (!target?.dataset.action) return;
+  runCommand(target.dataset.action as CommandAction);
 });
 
 fontSelect.addEventListener("change", () => {
@@ -308,63 +328,15 @@ librarySearch.addEventListener("input", () => {
   void refreshLibrary(librarySearch.value);
 });
 
-commandsDialog.addEventListener("click", (event) => {
-  if (event.target === commandsDialog) commandsDialog.close();
-});
-
 window.addEventListener("keydown", (event) => {
-  const mod = event.ctrlKey || event.metaKey;
-  if (!mod) return;
-  const key = event.key.toLowerCase();
-
-  if (key === "/" && !event.altKey && !event.shiftKey) {
-    event.preventDefault();
-    commandsDialog.open ? commandsDialog.close() : commandsDialog.showModal();
-    return;
-  }
-  if (key === "n" && !event.altKey && !event.shiftKey) {
-    event.preventDefault();
-    newDocument();
-  } else if (key === "o" && !event.altKey && !event.shiftKey) {
-    event.preventDefault();
-    void openDialog();
-  } else if (key === "s" && !event.altKey && !event.shiftKey) {
-    event.preventDefault();
-    void saveDocument();
-  } else if (key === "d" && !event.altKey && !event.shiftKey) {
-    event.preventDefault();
-    toggleFocus();
-  } else if (key === "r" && !event.altKey && !event.shiftKey) {
-    event.preventDefault();
-    prefs.showPreview = !prefs.showPreview;
-    persist();
-  } else if (key === "n" && event.altKey && !event.shiftKey) {
-    event.preventDefault();
-    cycleNight();
-  } else if (key === "t" && event.altKey && !event.shiftKey) {
-    event.preventDefault();
-    prefs.typewriter = !prefs.typewriter;
-    persist();
-  } else if (key === "l" && event.altKey && !event.shiftKey) {
-    event.preventDefault();
-    prefs.showLibrary = !prefs.showLibrary;
-    persist();
-  } else if (key === "d" && event.altKey && event.shiftKey) {
-    event.preventDefault();
-    toggleStyle();
-  } else if (key === "c" && event.shiftKey && !event.altKey) {
-    event.preventDefault();
-    prefs.showStats = !prefs.showStats;
-    persist();
-  } else if ((key === "=" || key === "+") && !event.altKey) {
-    event.preventDefault();
-    prefs.fontSize = Math.min(40, prefs.fontSize + 1);
-    persist();
-  } else if (key === "-" && !event.altKey) {
-    event.preventDefault();
-    prefs.fontSize = Math.max(12, prefs.fontSize - 1);
-    persist();
-  }
+  if (!(event.ctrlKey || event.metaKey)) return;
+  // Let the guide handle its own arrows / Enter / Esc while open,
+  // except Ctrl+/ which toggles it closed.
+  const action = findActionForEvent(event);
+  if (!action) return;
+  if (guide.isOpen() && action !== "commands") return;
+  event.preventDefault();
+  runCommand(action);
 });
 
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
