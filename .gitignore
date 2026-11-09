@@ -3,3 +3,6 @@ build/
 .DS_Store
 *.swp
 docs/screenshots/_html/
+linux/node_modules/
+linux/dist/
+linux/src-tauri/target/

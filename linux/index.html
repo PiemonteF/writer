@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Writer</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="icon" href="/logo.png" />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <div id="app">
+      <header class="toolbar" role="toolbar" aria-label="Writer">
+        <div class="brand">
+          <img src="/logo.png" alt="" />
+          <span>Writer</span>
+        </div>
+        <button type="button" data-action="new" title="New (Ctrl+N)">New</button>
+        <button type="button" data-action="open" title="Open (Ctrl+O)">Open</button>
+        <button type="button" data-action="save" title="Save (Ctrl+S)">Save</button>
+        <button type="button" data-action="library" title="Library (Alt+Ctrl+L)">Library</button>
+        <button type="button" data-action="preview" title="Preview (Ctrl+R)">Preview</button>
+        <button type="button" data-action="focus" title="Focus Mode (Ctrl+D)">Focus</button>
+        <button type="button" data-action="typewriter" title="Typewriter (Alt+Ctrl+T)">Typewriter</button>
+        <button type="button" data-action="night" title="Night Mode (Alt+Ctrl+N)">Night</button>
+        <button type="button" data-action="style" title="Style Check (Alt+Shift+Ctrl+D)">Style</button>
+        <select id="font-select" title="Font" aria-label="Font">
+          <option value="duo">Duo</option>
+          <option value="quattro">Quattro</option>
+          <option value="mono">Mono</option>
+        </select>
+        <button type="button" data-action="commands" title="Commands (Ctrl+/)">Commands</button>
+        <div class="spacer"></div>
+        <div class="title" id="doc-title">Untitled</div>
+      </header>
+
+      <div class="workspace" id="workspace">
+        <aside class="library" id="library">
+          <input
+            class="library-search"
+            id="library-search"
+            type="search"
+            placeholder="Search library"
+            aria-label="Search library"
+          />
+          <ul class="library-list" id="library-list"></ul>
+        </aside>
+        <section class="editor-pane" aria-label="Editor">
+          <div id="editor"></div>
+        </section>
+        <aside class="preview-pane" id="preview-pane" aria-label="Preview">
+          <iframe id="preview" title="Markdown preview" sandbox=""></iframe>
+        </aside>
+      </div>
+
+      <footer class="stats" id="stats">0 words · 0 min</footer>
+    </div>
+
+    <dialog class="commands-dialog" id="commands">
+      <h2>Commands</h2>
+      <ul>
+        <li><span>Commands</span><kbd>Ctrl+/</kbd></li>
+        <li><span>New</span><kbd>Ctrl+N</kbd></li>
+        <li><span>Open</span><kbd>Ctrl+O</kbd></li>
+        <li><span>Save</span><kbd>Ctrl+S</kbd></li>
+        <li><span>Focus Mode</span><kbd>Ctrl+D</kbd></li>
+        <li><span>Preview</span><kbd>Ctrl+R</kbd></li>
+        <li><span>Night Mode</span><kbd>Alt+Ctrl+N</kbd></li>
+        <li><span>Typewriter Mode</span><kbd>Alt+Ctrl+T</kbd></li>
+        <li><span>Library</span><kbd>Alt+Ctrl+L</kbd></li>
+        <li><span>Style Check</span><kbd>Alt+Shift+Ctrl+D</kbd></li>
+        <li><span>Word Count</span><kbd>Shift+Ctrl+C</kbd></li>
+        <li><span>Bigger text</span><kbd>Ctrl+=</kbd></li>
+        <li><span>Smaller text</span><kbd>Ctrl+-</kbd></li>
+      </ul>
+    </dialog>
+  </body>
+</html>

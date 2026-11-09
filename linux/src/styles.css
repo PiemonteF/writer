@@ -1,0 +1,369 @@
+@font-face {
+  font-family: "iA Writer Duo S";
+  src: url("/fonts/iAWriterDuoS-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "iA Writer Duo S";
+  src: url("/fonts/iAWriterDuoS-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "iA Writer Duo S";
+  src: url("/fonts/iAWriterDuoS-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "iA Writer Duo S";
+  src: url("/fonts/iAWriterDuoS-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "iA Writer Quattro S";
+  src: url("/fonts/iAWriterQuattroS-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "iA Writer Quattro S";
+  src: url("/fonts/iAWriterQuattroS-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "iA Writer Quattro S";
+  src: url("/fonts/iAWriterQuattroS-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "iA Writer Quattro S";
+  src: url("/fonts/iAWriterQuattroS-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "iA Writer Mono S";
+  src: url("/fonts/iAWriterMonoS-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "iA Writer Mono S";
+  src: url("/fonts/iAWriterMonoS-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "iA Writer Mono S";
+  src: url("/fonts/iAWriterMonoS-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "iA Writer Mono S";
+  src: url("/fonts/iAWriterMonoS-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light dark;
+  --bg: #fcfcfc;
+  --text: #1a1a1a;
+  --dimmed: #bfbfbf;
+  --markup: #8e9aa8;
+  --accent: #2f7cf6;
+  --panel: #f5f5f5;
+  --border: #e4e4e4;
+  --muted: #6e6e6e;
+  --toolbar-h: 44px;
+  --stats-h: 28px;
+  font-family: "iA Writer Duo S", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root[data-theme="dark"] {
+  --bg: #1e1e1e;
+  --text: #e6e6e6;
+  --dimmed: #575757;
+  --markup: #6c7885;
+  --accent: #4a90ff;
+  --panel: #181818;
+  --border: #333333;
+  --muted: #9a9a9a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  overflow: hidden;
+}
+
+#app {
+  display: grid;
+  grid-template-rows: var(--toolbar-h) 1fr var(--stats-h);
+  height: 100%;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+  user-select: none;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.brand img {
+  width: 22px;
+  height: 22px;
+}
+
+.toolbar button,
+.toolbar select {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.toolbar button:hover,
+.toolbar select:hover {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.toolbar button.active {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.toolbar .spacer {
+  flex: 1;
+}
+
+.toolbar .title {
+  color: var(--muted);
+  font-size: 13px;
+  max-width: 40vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 240px 1fr 0fr;
+  min-height: 0;
+  height: 100%;
+}
+
+.workspace.library-hidden {
+  grid-template-columns: 0 1fr 0fr;
+}
+
+.workspace.preview-on {
+  grid-template-columns: 240px 1fr 1fr;
+}
+
+.workspace.library-hidden.preview-on {
+  grid-template-columns: 0 1fr 1fr;
+}
+
+.library,
+.preview-pane,
+.editor-pane {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.library {
+  border-right: 1px solid var(--border);
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+}
+
+.library.hidden {
+  display: none;
+}
+
+.library-search {
+  margin: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.library-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 6px 12px;
+  overflow: auto;
+  flex: 1;
+}
+
+.library-list li button {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.library-list li button:hover,
+.library-list li button.active {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.library-list .dir {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 10px 10px 4px;
+}
+
+.editor-pane {
+  position: relative;
+  background: var(--bg);
+}
+
+#editor {
+  height: 100%;
+}
+
+.preview-pane {
+  border-left: 1px solid var(--border);
+  background: var(--bg);
+  display: none;
+}
+
+.workspace.preview-on .preview-pane {
+  display: block;
+}
+
+.preview-pane iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--bg);
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 16px;
+  border-top: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.stats.hidden {
+  display: none;
+}
+
+.commands-dialog {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--text);
+  padding: 0;
+  width: min(520px, 92vw);
+  max-height: min(70vh, 560px);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 25%);
+}
+
+.commands-dialog::backdrop {
+  background: rgb(0 0 0 / 35%);
+}
+
+.commands-dialog h2 {
+  margin: 0;
+  padding: 16px 18px 8px;
+  font-size: 15px;
+}
+
+.commands-dialog ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 8px 12px;
+  overflow: auto;
+  max-height: 50vh;
+}
+
+.commands-dialog li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  padding: 10px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.commands-dialog li:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.commands-dialog kbd {
+  font-family: "iA Writer Mono S", ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.dirty::after {
+  content: " ·";
+  color: var(--accent);
+}
