@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Writer
+GenericName=Markdown Editor
+Comment=A simple Markdown writing place — no AI
+Exec=@BIN@ %F
+Icon=@ICON@
+Terminal=false
+Categories=Office;TextEditor;
+MimeType=text/markdown;text/x-markdown;text/plain;
+Keywords=markdown;writing;notes;editor;text;
+StartupNotify=true
+StartupWMClass=Writer

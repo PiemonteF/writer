@@ -14,9 +14,9 @@ Authentic thoughts. Yours.
   <img src="docs/screenshots/editor-light.png" width="720" alt="Writer in light mode">
 </p>
 
-## Linux (Omarchy / Arch)
+## Install on Omarchy (Arch)
 
-### Dependencies
+### 1. Dependencies
 
 ```sh
 sudo pacman -S --needed webkit2gtk-4.1 base-devel curl wget file openssl \
@@ -24,23 +24,75 @@ sudo pacman -S --needed webkit2gtk-4.1 base-devel curl wget file openssl \
   rust nodejs npm
 ```
 
-### Run
+### 2. Build and install as a desktop app
 
 ```sh
 git clone https://github.com/PiemonteF/writer.git
 cd writer
-make linux-run
+make linux-install
 ```
 
-That installs npm deps and starts the Tauri app. Other targets:
+That builds the release binary and installs:
+
+| What | Where |
+| --- | --- |
+| Binary | `~/.local/bin/writer` |
+| Launcher entry | `~/.local/share/applications/writer.desktop` |
+| Icons | `~/.local/share/icons/hicolor/*/apps/writer.png` |
+
+Open the app launcher (**Super+Space** / Walker), type **Writer**, and launch it.
+
+`~/.local/bin` is already on `PATH` on a normal Omarchy setup. If `writer` is not found in a terminal, add this to your shell config:
 
 ```sh
-make linux-app    # release binary + deb/rpm/AppImage under linux/src-tauri/target/release/
-make linux-test   # frontend build + pure-logic smoke tests
-make clean
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
-Open any `.md`, `.markdown`, or `.txt` file, or start typing. The library defaults to `~/Documents/Writer`.
+### 3. Update
+
+```sh
+cd writer
+git pull
+make linux-install
+```
+
+### Uninstall
+
+```sh
+make linux-uninstall
+```
+
+### System-wide Arch package (optional)
+
+```sh
+make linux-pkg    # produces a .pkg.tar.zst under linux/packaging/arch/
+# then: sudo pacman -U linux/packaging/arch/writer-*.pkg.tar.zst
+```
+
+Or install into `/usr` directly (needs root):
+
+```sh
+sudo make linux-install PREFIX=/usr
+```
+
+### Portable bundles
+
+```sh
+make linux-app
+```
+
+Artifacts:
+
+- `linux/src-tauri/target/release/writer`
+- `linux/src-tauri/target/release/bundle/{deb,rpm,appimage}/`
+
+AppImage: `chmod +x *.AppImage && ./Writer_*.AppImage`. Deb/rpm include a `.desktop` entry when installed with their package managers.
+
+### Dev run (no install)
+
+```sh
+make linux-run
+```
 
 Details: [`linux/README.md`](linux/README.md).
 
@@ -85,4 +137,4 @@ Authorship, ⇧⌘A. What you typed stays black. What was pasted or generated is
 
 ## Layout
 
-See `docs/DESIGN.md` (macOS architecture) and the Omarchy port note in the project store when published with this work.
+See `docs/DESIGN.md` (macOS architecture) and the Omarchy port notes in the project docs store.

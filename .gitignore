@@ -6,3 +6,7 @@ docs/screenshots/_html/
 linux/node_modules/
 linux/dist/
 linux/src-tauri/target/
+linux/packaging/arch/pkg/
+linux/packaging/arch/src/
+linux/packaging/arch/*.pkg.tar.*
+linux/packaging/arch/*.log

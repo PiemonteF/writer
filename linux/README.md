@@ -20,9 +20,36 @@ sudo apt install -y libwebkit2gtk-4.1-dev build-essential curl wget file \
 # plus Rust (rustup) and Node 20+
 ```
 
-## Run
+## Install like a normal desktop app (Omarchy)
 
 From the repo root:
+
+```sh
+make linux-install
+```
+
+Installs the binary, icons, and an XDG `.desktop` entry under `~/.local` so **Walker** (`Super+Space`) lists **Writer**.
+
+| File | Path |
+| --- | --- |
+| Binary | `~/.local/bin/writer` |
+| Desktop entry | `~/.local/share/applications/writer.desktop` |
+| Icons | `~/.local/share/icons/hicolor/{32,128,256,512}x…/apps/writer.png` |
+
+Update: `git pull && make linux-install`  
+Remove: `make linux-uninstall`
+
+System-wide: `sudo make linux-install PREFIX=/usr`  
+Arch package: `make linux-pkg` (needs `makepkg`)
+
+Packaging sources:
+
+- `linux/scripts/install-desktop.sh` — XDG install
+- `linux/packaging/writer.desktop.in` — desktop template for user/system install
+- `linux/src-tauri/writer.desktop` — Tauri Handlebars template for deb/rpm
+- `linux/packaging/arch/PKGBUILD` — local Arch package
+
+## Run without installing
 
 ```sh
 make linux-run
@@ -36,7 +63,7 @@ npm install
 npm run tauri:dev
 ```
 
-## Build
+## Build bundles only
 
 ```sh
 make linux-app
@@ -47,8 +74,6 @@ Release binary and bundles land under:
 - `linux/src-tauri/target/release/writer`
 - `linux/src-tauri/target/release/bundle/{deb,rpm,appimage}/`
 
-Install the AppImage or package on Omarchy, or copy the `writer` binary somewhere on your `PATH`.
-
 ## Features in this port
 
 - Markdown editor with bundled iA Writer fonts (Duo / Quattro / Mono)
@@ -58,5 +83,6 @@ Install the AppImage or package on Omarchy, or copy the `writer` binary somewher
 - Style check (fillers, redundancies, clichés)
 - Night mode, typewriter scrolling, word count / reading time
 - Open / save `.md`, `.markdown`, `.txt`
+- Desktop launcher integration (icon + `.desktop`)
 
 Not yet ported from macOS: authorship coloring, parts-of-speech highlight, live Markdown (inline WYSIWYG), heading tree, PDF export.
