@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name={{name}}
+Comment={{comment}}
+Exec={{exec}} %F
+Icon={{icon}}
+Terminal=false
+Categories={{categories}}
+MimeType=text/markdown;text/x-markdown;text/plain;
+Keywords=markdown;writing;notes;editor;text;
+StartupNotify=true
+StartupWMClass=Writer

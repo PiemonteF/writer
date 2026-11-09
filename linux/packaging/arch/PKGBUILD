@@ -1,0 +1,93 @@
+# Maintainer: Fabio Piemonte
+#
+# Local Arch/Omarchy package built from the Writer git checkout.
+# Preferred UX on Omarchy is still: `make linux-install` (user ~/.local).
+# This PKGBUILD is for system-wide `/usr` installs via makepkg.
+#
+# From repo root:
+#   make linux-pkg
+#
+# Or:
+#   cd linux/packaging/arch && WRITER_SRC="$(git rev-parse --show-toplevel)" makepkg -si --holdver
+
+pkgname=writer
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="A simple Markdown writing place — no AI"
+arch=('x86_64' 'aarch64')
+url="https://github.com/PiemonteF/writer"
+license=('MIT')
+depends=(
+  'cairo'
+  'desktop-file-utils'
+  'gdk-pixbuf2'
+  'glib2'
+  'gtk3'
+  'hicolor-icon-theme'
+  'libsoup3'
+  'pango'
+  'webkit2gtk-4.1'
+)
+makedepends=(
+  'base-devel'
+  'cargo'
+  'nodejs'
+  'npm'
+  'openssl'
+  'appmenu-gtk-module'
+  'libappindicator-gtk3'
+  'librsvg'
+  'curl'
+  'wget'
+  'file'
+)
+options=('!lto' '!strip')
+# Filled by make linux-pkg / makepkg wrapper; points at the live checkout.
+source=()
+sha256sums=()
+
+prepare() {
+  if [[ -z "${WRITER_SRC:-}" ]]; then
+    echo "Set WRITER_SRC to the Writer repo root (make linux-pkg does this)." >&2
+    exit 1
+  fi
+  mkdir -p "$srcdir"
+  ln -sfn "$WRITER_SRC" "$srcdir/writer"
+}
+
+build() {
+  cd "$srcdir/writer"
+  make linux-app
+}
+
+package() {
+  local root="$srcdir/writer"
+  local bin="$root/linux/src-tauri/target/release/writer"
+  install -Dm755 "$bin" "$pkgdir/usr/bin/writer"
+
+  install -Dm644 "$root/linux/src-tauri/icons/32x32.png" \
+    "$pkgdir/usr/share/icons/hicolor/32x32/apps/writer.png"
+  install -Dm644 "$root/linux/src-tauri/icons/128x128.png" \
+    "$pkgdir/usr/share/icons/hicolor/128x128/apps/writer.png"
+  install -Dm644 "$root/linux/src-tauri/icons/128x128@2x.png" \
+    "$pkgdir/usr/share/icons/hicolor/256x256/apps/writer.png"
+  install -Dm644 "$root/linux/src-tauri/icons/icon.png" \
+    "$pkgdir/usr/share/icons/hicolor/512x512/apps/writer.png"
+
+  install -Dm644 /dev/stdin "$pkgdir/usr/share/applications/writer.desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Writer
+GenericName=Markdown Editor
+Comment=A simple Markdown writing place — no AI
+Exec=/usr/bin/writer %F
+Icon=writer
+Terminal=false
+Categories=Office;TextEditor;
+MimeType=text/markdown;text/x-markdown;text/plain;
+Keywords=markdown;writing;notes;editor;text;
+StartupNotify=true
+StartupWMClass=Writer
+EOF
+}

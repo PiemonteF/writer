@@ -8,108 +8,139 @@ A simple place with no AI. If there is any, you know.
 
 Authentic thoughts. Yours.
 
-Native Swift and AppKit. No Xcode project.
+**Primary target: Omarchy / Arch Linux** (Tauri 2 + TypeScript + CodeMirror). The original macOS Swift/AppKit app remains in `Sources/` for reference.
 
 <p align="center">
   <img src="docs/screenshots/editor-light.png" width="720" alt="Writer in light mode">
 </p>
 
-Authorship, ⇧⌘A. What you typed stays black. What was pasted or generated is in color. Rewrite it and it becomes yours again.
+## Install on Omarchy (Arch)
 
-<p align="center">
-  <img src="docs/screenshots/authorship-light.png" width="720" alt="Authorship: your words in black, pasted AI in color">
-</p>
+### 1. Dependencies
 
-## Install from a release
+```sh
+sudo pacman -S --needed webkit2gtk-4.1 base-devel curl wget file openssl \
+  appmenu-gtk-module libappindicator-gtk3 librsvg \
+  rust nodejs npm
+```
 
-Requires macOS 14 or later, on Apple Silicon or Intel.
-
-1. Download `Writer-macOS.zip` from the [latest release](../../releases/latest).
-2. Unzip it and drag `Writer.app` into **Applications**.
-3. Open Writer. It has no Apple developer signature or notarization. If macOS
-   blocks it, open **System Settings > Privacy & Security**, click **Open Anyway**
-   for Writer, then confirm **Open**. See [Apple's instructions](https://support.apple.com/en-us/102445).
-
-## Run it
-
-macOS 14 or later, and Xcode 16 at `/Applications/Xcode.app`. The Makefile points `DEVELOPER_DIR` at that copy because the Command Line Tools SwiftPM on this machine cannot link package manifests.
+### 2. Build and install as a desktop app
 
 ```sh
 git clone https://github.com/PiemonteF/writer.git
 cd writer
-make run
+make linux-install
 ```
 
-That builds `build/Writer.app` and opens it. Other targets:
+That builds the release binary and installs:
+
+| What | Where |
+| --- | --- |
+| Binary | `~/.local/bin/writer` |
+| Launcher entry | `~/.local/share/applications/writer.desktop` |
+| Icons | `~/.local/share/icons/hicolor/*/apps/writer.png` |
+
+Open the app launcher (**Super+Space** / Walker), type **Writer**, and launch it.
+
+`~/.local/bin` is already on `PATH` on a normal Omarchy setup. If `writer` is not found in a terminal, add this to your shell config:
 
 ```sh
-make app       # build only
-make install   # copy to /Applications and open
-make test      # pure-function tests
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
-Open any `.md`, `.markdown`, or `.txt` file, or start typing in the untitled window.
+### 3. Update
 
-## What it looks like
+```sh
+cd writer
+git pull
+make linux-install
+```
 
-Night Mode, ⌥⌘N.
+### Uninstall
 
-<img src="docs/screenshots/editor-dark.png" width="720" alt="Writer in night mode">
+```sh
+make linux-uninstall
+```
 
-Syntax Highlight, ⇧⌘D. Nouns red, verbs blue, adjectives brown, adverbs magenta, conjunctions green.
+### System-wide Arch package (optional)
 
-<img src="docs/screenshots/syntax-dark.png" width="720" alt="Parts of speech colored in the editor">
+```sh
+make linux-pkg    # produces a .pkg.tar.zst under linux/packaging/arch/
+# then: sudo pacman -U linux/packaging/arch/writer-*.pkg.tar.zst
+```
 
-Focus Mode, ⌘D. The current sentence stays, the rest recedes.
+Or install into `/usr` directly (needs root):
 
-<img src="docs/screenshots/focus-light.png" width="720" alt="Focus mode on the current sentence">
+```sh
+sudo make linux-install PREFIX=/usr
+```
 
-Preview, ⌘R. Markdown on the left, HTML on the right.
+### Portable bundles
 
-<img src="docs/screenshots/preview-light.png" width="900" alt="Editor and preview side by side">
+```sh
+make linux-app
+```
 
-Style Check, ⌥⇧⌘D. Fillers, clichés, and redundancies are struck in the editor only. Double-click a struck phrase to select it.
+Artifacts:
 
-<img src="docs/screenshots/style-check.png" width="720" alt="Style check striking weak phrases">
+- `linux/src-tauri/target/release/writer`
+- `linux/src-tauri/target/release/bundle/{deb,rpm,appimage}/`
 
-Library, ⌥⌘L. A folder of Markdown and text files, with search. File > Choose Library Folder. Default is `~/Documents/Writer`.
+AppImage: `chmod +x *.AppImage && ./Writer_*.AppImage`. Deb/rpm include a `.desktop` entry when installed with their package managers.
 
-<img src="docs/screenshots/library-dark.png" width="820" alt="Library sidebar next to the editor">
+### Dev run (no install)
 
-## What it does
+```sh
+make linux-run
+```
 
-- Commands (⌘/): list every command with its shortcut and what it does. Also under View and Help, and as Commands in the title bar.
-- Live Markdown Preview (⌥⌘R): edit formatted Markdown inline, with one-backspace divider deletion, boxed code blocks with thin editable fences, and GitHub-style quotes.
-- Heading Tree (⌥⌘O): a floating, clickable outline of `#`, `##` and `###` headings, with the visible section highlighted, hand cursors, and a smooth hover fade.
-- Both modes are off by default; enable them under **Writer > Settings**.
-- Choose any installed font under **View > Font > System fonts**.
-- Every push to `main` builds a universal macOS app and publishes the ZIP to Releases, GitHub Packages, and Actions artifacts.
-- Centered column, dimmed markup, bold headings, italic emphasis, monospaced code. Fonts are iA Writer Duo, Quattro, and Mono, bundled, SIL OFL.
-- Typewriter Mode (⌥⌘T) keeps the caret line centered.
-- Authorship (⇧⌘A). Paste as / Mark as live under Authors.
-- Word count and reading time (⇧⌘C toggles the bar).
-- Export to HTML or PDF. Copy HTML with ⌥⌘C.
-- Format: Bold ⌘B, Italic ⌘I, Heading 1 to 3 (⌥⌘1 to ⌥⌘3), Body ⌥⌘0.
-- Standard document behavior: autosave, versions, Open Recent, rename, duplicate, find (⌘F), spelling.
+Details: [`linux/README.md`](linux/README.md).
 
-## Shortcuts
+### What works on Linux
+
+- Markdown editor with iA Writer Duo / Quattro / Mono fonts
+- Library sidebar with search
+- Preview (Ctrl+R)
+- Focus Mode (Ctrl+D) — sentence / paragraph
+- Style Check (Alt+Shift+Ctrl+D)
+- Night Mode (Alt+Ctrl+N), Typewriter (Alt+Ctrl+T)
+- Word count and reading time (Shift+Ctrl+C)
+- In-app commands / shortcuts guide (Ctrl+/ or Ctrl+?)
+
+Still Mac-only for now: authorship coloring, parts-of-speech highlight, live Markdown preview, heading tree, PDF export.
+
+## macOS (legacy)
+
+Requires macOS 14+ and Xcode 16 at `/Applications/Xcode.app`.
+
+```sh
+make macos-run    # build build/Writer.app and open
+make macos-test   # Swift pure-function tests
+```
+
+Or download `Writer-macOS.zip` from [Releases](../../releases/latest).
+
+Authorship, ⇧⌘A. What you typed stays black. What was pasted or generated is in color. Rewrite it and it becomes yours again.
+
+## Shortcuts (Linux)
+
+Press **Ctrl+/** or **Ctrl+?** (or the Commands toolbar button) for the full searchable guide — every action, key, and a short description. Filter with the search box; ↑↓ + Enter runs a command.
 
 | Action | Key |
 | --- | --- |
-| Commands | ⌘/ |
-| Focus Mode | ⌘D |
-| Preview | ⌘R |
-| Live Markdown Preview | ⌥⌘R |
-| Heading Tree | ⌥⌘O |
-| Night Mode | ⌥⌘N |
-| Typewriter Mode | ⌥⌘T |
-| Library | ⌥⌘L |
-| Syntax Highlight | ⇧⌘D |
-| Style Check | ⌥⇧⌘D |
-| Authorship | ⇧⌘A |
-| Word Count | ⇧⌘C |
-| Copy HTML | ⌥⌘C |
+| Commands / shortcuts guide | Ctrl+/ or Ctrl+? |
+| New / Open / Save | Ctrl+N / Ctrl+O / Ctrl+S |
+| Focus Mode | Ctrl+D |
+| Preview | Ctrl+R |
+| Night Mode | Alt+Ctrl+N |
+| Typewriter Mode | Alt+Ctrl+T |
+| Library | Alt+Ctrl+L |
+| Style Check | Alt+Shift+Ctrl+D |
+| Word Count | Shift+Ctrl+C |
+| Bigger / Smaller text | Ctrl+= / Ctrl+- |
+
+Writer uses **Ctrl / Alt+Ctrl** only (no Super), so it stays clear of Omarchy/Hyprland compositor binds (Super+Space, Super+Ctrl+…, etc.).
 
 ## Layout
 
-See `docs/DESIGN.md`.
+See `docs/DESIGN.md` (macOS architecture) and the Omarchy port notes in the project docs store.

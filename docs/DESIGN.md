@@ -1,6 +1,10 @@
 # Writer
 
-A personal macOS clone of iA Writer. Native Swift, AppKit for the editor, no Xcode project: Swift Package Manager builds the binary and `scripts/build-app.sh` wraps it into `build/Writer.app`.
+A personal writing app in the spirit of iA Writer.
+
+**Primary runtime today is Linux (Omarchy / Arch):** Tauri 2 + TypeScript + CodeMirror under `linux/`. See that folder’s README and the project Omarchy port note for stack rationale and feature parity.
+
+The remainder of this document describes the original **macOS** architecture: Native Swift, AppKit for the editor, no Xcode project — Swift Package Manager builds the binary and `scripts/build-app.sh` wraps it into `build/Writer.app`.
 
 ## Constraints
 
